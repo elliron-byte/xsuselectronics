@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Diamond, Wallet, Database, Shield, Home as HomeIcon, ShoppingCart, Users, User } from "lucide-react";
+import { ChevronRight, Diamond, Wallet, Database, Shield, Home as HomeIcon, ShoppingCart, Users, User, Headphones } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,7 +39,7 @@ const Profile = () => {
     { icon: Wallet, label: "Income Record", color: "text-primary" },
     { icon: Database, label: "Recharge Record", color: "text-primary" },
     { icon: Database, label: "Withdraw Record", color: "text-primary" },
-    { icon: Shield, label: "Security Manager", color: "text-primary" },
+    { icon: Shield, label: "Bonus Code", color: "text-primary" },
   ];
 
   return (
@@ -124,23 +124,23 @@ const Profile = () => {
           </button>
           
           <button
+            onClick={() => navigate("/devices")}
             className="flex flex-col items-center gap-1 py-2 px-3 text-muted-foreground"
           >
             <ShoppingCart className="w-6 h-6" />
-            <span className="text-xs">Devices</span>
+            <span className="text-xs">Task</span>
           </button>
 
           {/* Center Action Button */}
           <button className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
-            <div className="w-7 h-7 bg-white rounded-full" />
+            <Headphones className="w-6 h-6 text-white" />
           </button>
 
           <button
-            onClick={() => navigate("/team")}
             className="flex flex-col items-center gap-1 py-2 px-3 text-muted-foreground"
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs">Team</span>
+            <span className="text-xs">About</span>
           </button>
 
           <button
