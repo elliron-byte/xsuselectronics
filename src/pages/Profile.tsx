@@ -10,8 +10,8 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userPhone = localStorage.getItem('userPhone');
-      if (!userPhone) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         navigate('/login');
         return;
       }
@@ -19,8 +19,8 @@ const Profile = () => {
       const { data } = await supabase
         .from('registered_users')
         .select('phone, unique_code, balance')
-        .eq('phone', userPhone)
-        .single();
+        .eq('user_id', session.user.id)
+        .maybeSingle();
 
       if (data) {
         setUserData({
