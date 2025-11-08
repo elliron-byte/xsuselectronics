@@ -60,7 +60,7 @@ const Profile = () => {
   }, [navigate]);
 
   const menuItems = [
-    { icon: Users, label: "Team", color: "text-primary", path: "/team" },
+    { icon: Diamond, label: "About Company", color: "text-primary", path: "/about" },
     { icon: Wallet, label: "Income Record", color: "text-primary", path: "/income-record" },
     { icon: Database, label: "Recharge Record", color: "text-primary", path: "/recharge-record" },
     { icon: Database, label: "Withdraw Record", color: "text-primary", path: "/withdraw-record" },
@@ -166,10 +166,11 @@ const Profile = () => {
           </button>
 
           <button
+            onClick={() => navigate("/team")}
             className="flex flex-col items-center gap-1 py-2 px-3 text-muted-foreground"
           >
             <Users className="w-6 h-6" />
-            <span className="text-xs">About</span>
+            <span className="text-xs">Team</span>
           </button>
 
           <button
