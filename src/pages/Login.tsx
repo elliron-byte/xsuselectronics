@@ -44,8 +44,21 @@ const Login = () => {
       }
 
       if (data.session) {
-        toast.success("Login successful!");
-        navigate("/dashboard");
+        // Check if user has admin role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.session.user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (roleData) {
+          toast.success("Welcome Admin!");
+          navigate("/admin");
+        } else {
+          toast.success("Login successful!");
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
