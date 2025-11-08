@@ -11,8 +11,8 @@ const Team = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userPhone = localStorage.getItem('userPhone');
-      if (!userPhone) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         navigate('/login');
         return;
       }
@@ -20,11 +20,10 @@ const Team = () => {
       const { data } = await supabase
         .from('registered_users')
         .select('unique_code')
-        .eq('phone', userPhone)
+        .eq('user_id', session.user.id)
         .single();
 
       if (data) {
-        // Count how many people used this user's unique code as their invitation code
         const { count } = await supabase
           .from('registered_users')
           .select('*', { count: 'exact', head: true })
@@ -38,6 +37,14 @@ const Team = () => {
     };
 
     fetchUserData();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const teamLevels = [

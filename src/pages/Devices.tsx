@@ -28,13 +28,13 @@ const Devices = () => {
   }, [canCheckIn]);
 
   const checkCheckInStatus = async () => {
-    const userPhone = localStorage.getItem('userPhone');
-    if (!userPhone) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
 
     const { data } = await supabase
       .from('registered_users')
       .select('last_checkin_at')
-      .eq('phone', userPhone)
+      .eq('user_id', session.user.id)
       .single();
 
     if (data?.last_checkin_at) {
@@ -50,13 +50,13 @@ const Devices = () => {
   };
 
   const updateTimeRemaining = async () => {
-    const userPhone = localStorage.getItem('userPhone');
-    if (!userPhone) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
 
     const { data } = await supabase
       .from('registered_users')
       .select('last_checkin_at')
-      .eq('phone', userPhone)
+      .eq('user_id', session.user.id)
       .single();
 
     if (data?.last_checkin_at) {
@@ -80,14 +80,14 @@ const Devices = () => {
   const handleCheckIn = async () => {
     if (!canCheckIn) return;
 
-    const userPhone = localStorage.getItem('userPhone');
-    if (!userPhone) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
 
     try {
       const { data: userData } = await supabase
         .from('registered_users')
         .select('balance')
-        .eq('phone', userPhone)
+        .eq('user_id', session.user.id)
         .single();
 
       const currentBalance = Number(userData?.balance) || 0;
@@ -99,7 +99,7 @@ const Devices = () => {
           balance: newBalance,
           last_checkin_at: new Date().toISOString()
         })
-        .eq('phone', userPhone);
+        .eq('user_id', session.user.id);
 
       if (error) throw error;
 
@@ -122,9 +122,16 @@ const Devices = () => {
 
   const fetchUserDevices = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('user_devices')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('purchased_at', { ascending: false });
 
       if (error) throw error;

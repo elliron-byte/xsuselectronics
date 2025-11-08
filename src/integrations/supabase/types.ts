@@ -14,13 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      registered_users: {
+        Row: {
+          balance: number | null
+          created_at: string
+          id: string
+          invitation_code: string | null
+          last_checkin_at: string | null
+          password: string | null
+          phone: string | null
+          unique_code: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          invitation_code?: string | null
+          last_checkin_at?: string | null
+          password?: string | null
+          phone?: string | null
+          unique_code?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          invitation_code?: string | null
+          last_checkin_at?: string | null
+          password?: string | null
+          phone?: string | null
+          unique_code?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_devices: {
+        Row: {
+          daily_income: string
+          device_name: string
+          device_number: number
+          id: string
+          product_price: string
+          purchased_at: string
+          total_income: string
+          user_id: string | null
+          user_phone: string
+        }
+        Insert: {
+          daily_income: string
+          device_name: string
+          device_number: number
+          id?: string
+          product_price: string
+          purchased_at?: string
+          total_income: string
+          user_id?: string | null
+          user_phone: string
+        }
+        Update: {
+          daily_income?: string
+          device_name?: string
+          device_number?: number
+          id?: string
+          product_price?: string
+          purchased_at?: string
+          total_income?: string
+          user_id?: string | null
+          user_phone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_unique_code: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

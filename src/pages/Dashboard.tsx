@@ -10,30 +10,45 @@ const Dashboard = () => {
   const [activeNav, setActiveNav] = useState<"home" | "devices" | "team" | "profile">("home");
   const [userData, setUserData] = useState<{ phone: string; uniqueCode: string; balance: number } | null>(null);
 
+  const [session, setSession] = useState<any>(null);
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userPhone = localStorage.getItem('userPhone');
-      if (!userPhone) {
+    const checkAuth = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
         navigate('/login');
         return;
       }
 
-      const { data, error } = await supabase
+      setSession(currentSession);
+
+      const { data } = await supabase
         .from('registered_users')
-        .select('phone, unique_code, balance')
-        .eq('phone', userPhone)
+        .select('unique_code, balance')
+        .eq('user_id', currentSession.user.id)
         .single();
 
       if (data) {
         setUserData({ 
-          phone: data.phone, 
+          phone: currentSession.user.email || '',
           uniqueCode: data.unique_code || '00000',
           balance: Number(data.balance) || 20
         });
       }
     };
 
-    fetchUserData();
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/login');
+      } else {
+        setSession(session);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const investments = [
