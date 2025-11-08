@@ -320,7 +320,10 @@ const Dashboard = () => {
           </button>
 
           {/* Center Action Button */}
-          <button className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg"
+          >
             <RotateCcw className="w-7 h-7 text-white" />
           </button>
 

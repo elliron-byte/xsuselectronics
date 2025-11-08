@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 const Profile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<{ phone: string; uniqueCode: string; balance: number } | null>(null);
+  const [totalRecharge, setTotalRecharge] = useState<number>(0);
+  const [totalWithdraw, setTotalWithdraw] = useState<number>(0);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,13 +31,36 @@ const Profile = () => {
           balance: Number(data.balance) || 20
         });
       }
+
+      // Fetch total recharge amount
+      const { data: rechargeData } = await supabase
+        .from('recharge_records')
+        .select('amount')
+        .eq('user_id', session.user.id);
+
+      if (rechargeData) {
+        const total = rechargeData.reduce((sum, record) => sum + Number(record.amount), 0);
+        setTotalRecharge(total);
+      }
+
+      // Fetch total withdraw amount
+      const { data: withdrawData } = await supabase
+        .from('withdraw_records')
+        .select('amount')
+        .eq('user_id', session.user.id)
+        .eq('status', 'successful');
+
+      if (withdrawData) {
+        const total = withdrawData.reduce((sum, record) => sum + Number(record.amount), 0);
+        setTotalWithdraw(total);
+      }
     };
 
     fetchUserData();
   }, [navigate]);
 
   const menuItems = [
-    { icon: Diamond, label: "About Company", color: "text-primary", path: "/about" },
+    { icon: Users, label: "Team", color: "text-primary", path: "/team" },
     { icon: Wallet, label: "Income Record", color: "text-primary", path: "/income-record" },
     { icon: Database, label: "Recharge Record", color: "text-primary", path: "/recharge-record" },
     { icon: Database, label: "Withdraw Record", color: "text-primary", path: "/withdraw-record" },
@@ -81,11 +106,11 @@ const Profile = () => {
             <div className="text-sm opacity-90">Balance</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold mb-1">Ghs 0</div>
+            <div className="text-2xl font-bold mb-1">GHS {totalRecharge}</div>
             <div className="text-sm opacity-90">Recharge</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold mb-1">Ghs 0</div>
+            <div className="text-2xl font-bold mb-1">GHS {totalWithdraw}</div>
             <div className="text-sm opacity-90">Withdraw</div>
           </div>
         </div>
