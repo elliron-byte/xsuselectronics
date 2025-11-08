@@ -12,6 +12,7 @@ const Devices = () => {
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [canCheckIn, setCanCheckIn] = useState(true);
+  const [deviceTimers, setDeviceTimers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchUserDevices();
@@ -26,6 +27,15 @@ const Devices = () => {
       return () => clearInterval(interval);
     }
   }, [canCheckIn]);
+
+  useEffect(() => {
+    if (devices.length > 0) {
+      const interval = setInterval(() => {
+        updateDeviceTimers();
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [devices]);
 
   const checkCheckInStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -120,6 +130,70 @@ const Devices = () => {
     }
   };
 
+  const updateDeviceTimers = async () => {
+    const newTimers: Record<string, string> = {};
+    const now = new Date().getTime();
+
+    for (const device of devices) {
+      const lastPayout = new Date(device.last_payout_at).getTime();
+      const nextPayout = lastPayout + 24 * 60 * 60 * 1000;
+      const diff = nextPayout - now;
+
+      if (diff <= 0) {
+        // Timer expired, credit the daily income
+        await creditDailyIncome(device);
+        newTimers[device.id] = "Crediting...";
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        newTimers[device.id] = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+    }
+
+    setDeviceTimers(newTimers);
+  };
+
+  const creditDailyIncome = async (device: any) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Get current balance
+      const { data: userData } = await supabase
+        .from('registered_users')
+        .select('balance')
+        .eq('user_id', session.user.id)
+        .single();
+
+      const currentBalance = Number(userData?.balance) || 0;
+      const dailyIncome = parseFloat(device.daily_income.replace(/[^\d.-]/g, ''));
+      const newBalance = currentBalance + dailyIncome;
+
+      // Update balance
+      await supabase
+        .from('registered_users')
+        .update({ balance: newBalance })
+        .eq('user_id', session.user.id);
+
+      // Update last payout time
+      await supabase
+        .from('user_devices')
+        .update({ last_payout_at: new Date().toISOString() })
+        .eq('id', device.id);
+
+      toast({
+        title: "Daily income credited",
+        description: `${device.daily_income} added to your account`,
+      });
+
+      // Refresh devices
+      await fetchUserDevices();
+    } catch (error) {
+      console.error('Error crediting daily income:', error);
+    }
+  };
+
   const fetchUserDevices = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -193,7 +267,14 @@ const Devices = () => {
             <Card key={device.id} className="bg-card">
               <CardContent className="p-4">
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-lg text-foreground">{device.device_name}</h3>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-lg text-foreground">{device.device_name}</h3>
+                    <div className="bg-primary/10 px-3 py-1 rounded-lg">
+                      <p className="text-sm font-mono font-semibold text-primary">
+                        {deviceTimers[device.id] || "00:00:00"}
+                      </p>
+                    </div>
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>

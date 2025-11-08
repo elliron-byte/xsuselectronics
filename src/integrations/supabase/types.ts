@@ -56,6 +56,7 @@ export type Database = {
           device_name: string
           device_number: number
           id: string
+          last_payout_at: string | null
           product_price: string
           purchased_at: string
           total_income: string
@@ -67,6 +68,7 @@ export type Database = {
           device_name: string
           device_number: number
           id?: string
+          last_payout_at?: string | null
           product_price: string
           purchased_at?: string
           total_income: string
@@ -78,6 +80,7 @@ export type Database = {
           device_name?: string
           device_number?: number
           id?: string
+          last_payout_at?: string | null
           product_price?: string
           purchased_at?: string
           total_income?: string
