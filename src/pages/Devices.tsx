@@ -1,0 +1,258 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Home, Users, User, Calendar } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+const Devices = () => {
+  const navigate = useNavigate();
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [canCheckIn, setCanCheckIn] = useState(true);
+
+  useEffect(() => {
+    fetchUserDevices();
+    checkCheckInStatus();
+  }, []);
+
+  useEffect(() => {
+    if (!canCheckIn) {
+      const interval = setInterval(() => {
+        updateTimeRemaining();
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [canCheckIn]);
+
+  const checkCheckInStatus = async () => {
+    const userPhone = localStorage.getItem('userPhone');
+    if (!userPhone) return;
+
+    const { data } = await supabase
+      .from('registered_users')
+      .select('last_checkin_at')
+      .eq('phone', userPhone)
+      .single();
+
+    if (data?.last_checkin_at) {
+      const lastCheckIn = new Date(data.last_checkin_at);
+      const now = new Date();
+      const hoursSinceCheckIn = (now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursSinceCheckIn < 24) {
+        setCanCheckIn(false);
+        updateTimeRemaining();
+      }
+    }
+  };
+
+  const updateTimeRemaining = async () => {
+    const userPhone = localStorage.getItem('userPhone');
+    if (!userPhone) return;
+
+    const { data } = await supabase
+      .from('registered_users')
+      .select('last_checkin_at')
+      .eq('phone', userPhone)
+      .single();
+
+    if (data?.last_checkin_at) {
+      const lastCheckIn = new Date(data.last_checkin_at);
+      const nextCheckIn = new Date(lastCheckIn.getTime() + 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const diff = nextCheckIn.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setCanCheckIn(true);
+        setTimeRemaining("");
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+      }
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!canCheckIn) return;
+
+    const userPhone = localStorage.getItem('userPhone');
+    if (!userPhone) return;
+
+    try {
+      const { data: userData } = await supabase
+        .from('registered_users')
+        .select('balance')
+        .eq('phone', userPhone)
+        .single();
+
+      const currentBalance = Number(userData?.balance) || 0;
+      const newBalance = currentBalance + 1;
+
+      const { error } = await supabase
+        .from('registered_users')
+        .update({ 
+          balance: newBalance,
+          last_checkin_at: new Date().toISOString()
+        })
+        .eq('phone', userPhone);
+
+      if (error) throw error;
+
+      toast({
+        title: "Daily check in successful",
+        description: "Come back tomorrow",
+      });
+
+      setCanCheckIn(false);
+      updateTimeRemaining();
+    } catch (error) {
+      console.error('Error checking in:', error);
+      toast({
+        title: "Check-in failed",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const fetchUserDevices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_devices')
+        .select('*')
+        .order('purchased_at', { ascending: false });
+
+      if (error) throw error;
+      setDevices(data || []);
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      {/* Header */}
+      <div className="bg-primary text-primary-foreground p-6">
+        <h1 className="text-2xl font-bold">My Devices</h1>
+      </div>
+
+      {/* Daily Check In */}
+      <div className="p-4">
+        <Card className="bg-card">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-8 h-8 text-primary" />
+                <div>
+                  <h3 className="font-semibold text-foreground">Daily Check In</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {canCheckIn ? "Check in daily to earn rewards" : `Next check-in: ${timeRemaining}`}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={handleCheckIn}
+                disabled={!canCheckIn}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Check In
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Devices List */}
+      <div className="p-4 space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">Purchased Devices</h2>
+        
+        {loading ? (
+          <p className="text-center text-muted-foreground py-8">Loading devices...</p>
+        ) : devices.length === 0 ? (
+          <Card className="bg-card">
+            <CardContent className="p-8">
+              <p className="text-center text-muted-foreground">No devices have been bought</p>
+            </CardContent>
+          </Card>
+        ) : (
+          devices.map((device) => (
+            <Card key={device.id} className="bg-card">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg text-foreground">{device.device_name}</h3>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Product Price</p>
+                      <p className="font-semibold text-foreground">{device.product_price}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Daily Income</p>
+                      <p className="font-semibold text-foreground">{device.daily_income}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Total Income</p>
+                      <p className="font-semibold text-foreground">{device.total_income}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Purchased On</p>
+                      <p className="font-semibold text-foreground">
+                        {new Date(device.purchased_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+        <div className="flex justify-around items-center h-16">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Home className="w-5 h-5" />
+            <span className="text-xs">Home</span>
+          </button>
+          
+          <button
+            onClick={() => navigate("/devices")}
+            className="flex flex-col items-center gap-1 text-primary"
+          >
+            <Calendar className="w-5 h-5" />
+            <span className="text-xs">Devices</span>
+          </button>
+          
+          <button
+            onClick={() => navigate("/team")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-xs">Team</span>
+          </button>
+          
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <User className="w-5 h-5" />
+            <span className="text-xs">Profile</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Devices;
