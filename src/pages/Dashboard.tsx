@@ -4,6 +4,7 @@ import { Wallet, ArrowDownToLine, Users, Calendar, Send, RotateCcw, Home as Home
 import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -55,7 +56,8 @@ const Dashboard = () => {
     {
       id: 1,
       name: "Device 1",
-      price: "60 Ghs",
+      price: 60,
+      priceDisplay: "60 Ghs",
       revenue: "30 Days",
       dailyEarnings: "9 Ghs",
       totalGain: "270 Ghs",
@@ -63,7 +65,8 @@ const Dashboard = () => {
     {
       id: 2,
       name: "Device 2",
-      price: "110 Ghs",
+      price: 110,
+      priceDisplay: "110 Ghs",
       revenue: "30 Days",
       dailyEarnings: "20 Ghs",
       totalGain: "600 Ghs",
@@ -71,7 +74,8 @@ const Dashboard = () => {
     {
       id: 3,
       name: "Device 3",
-      price: "220 Ghs",
+      price: 220,
+      priceDisplay: "220 Ghs",
       revenue: "30 Days",
       dailyEarnings: "27 Ghs",
       totalGain: "810 Ghs",
@@ -79,7 +83,8 @@ const Dashboard = () => {
     {
       id: 4,
       name: "Device 4",
-      price: "400 Ghs",
+      price: 400,
+      priceDisplay: "400 Ghs",
       revenue: "30 Days",
       dailyEarnings: "40 Ghs",
       totalGain: "1200 Ghs",
@@ -87,12 +92,83 @@ const Dashboard = () => {
     {
       id: 5,
       name: "Device 5",
-      price: "600 Ghs",
+      price: 600,
+      priceDisplay: "600 Ghs",
       revenue: "30 Days",
       dailyEarnings: "60 Ghs",
       totalGain: "1800 Ghs",
     },
   ];
+
+  const handleInvest = async (investment: typeof investments[0]) => {
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to invest",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const currentBalance = userData?.balance || 0;
+    
+    if (currentBalance < investment.price) {
+      toast({
+        title: "Insufficient balance",
+        description: `You need GHS ${investment.price} to invest in this device. Your current balance is GHS ${currentBalance}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Get user phone for the device record
+      const { data: userPhoneData } = await supabase
+        .from('registered_users')
+        .select('phone')
+        .eq('user_id', session.user.id)
+        .single();
+
+      // Deduct balance
+      const newBalance = currentBalance - investment.price;
+      const { error: balanceError } = await supabase
+        .from('registered_users')
+        .update({ balance: newBalance })
+        .eq('user_id', session.user.id);
+
+      if (balanceError) throw balanceError;
+
+      // Add device to user_devices
+      const { error: deviceError } = await supabase
+        .from('user_devices')
+        .insert({
+          user_id: session.user.id,
+          user_phone: userPhoneData?.phone || '',
+          device_name: investment.name,
+          device_number: investment.id,
+          product_price: investment.priceDisplay,
+          daily_income: investment.dailyEarnings,
+          total_income: investment.totalGain
+        });
+
+      if (deviceError) throw deviceError;
+
+      // Update local state
+      setUserData(prev => prev ? { ...prev, balance: newBalance } : null);
+
+      toast({
+        title: "Investment successful!",
+        description: `You have successfully invested in ${investment.name}. Your new balance is GHS ${newBalance}`,
+      });
+    } catch (error) {
+      console.error('Investment error:', error);
+      toast({
+        title: "Investment failed",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -188,7 +264,7 @@ const Dashboard = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Product Price</span>
-                    <span className="font-semibold">{investment.price}</span>
+                    <span className="font-semibold">{investment.priceDisplay}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Revenue</span>
@@ -207,7 +283,10 @@ const Dashboard = () => {
             </div>
 
             {/* Invest Button */}
-            <Button className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-11 rounded-xl">
+            <Button 
+              onClick={() => handleInvest(investment)}
+              className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-11 rounded-xl"
+            >
               Invest Now
             </Button>
           </div>

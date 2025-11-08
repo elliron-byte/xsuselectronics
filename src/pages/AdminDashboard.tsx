@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<any[]>([]);
+  const [userDevices, setUserDevices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
     checkAdminAccess();
     fetchUsers();
     fetchStats();
+    fetchUserDevices();
   }, []);
 
   const checkAdminAccess = async () => {
@@ -94,6 +96,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchUserDevices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_devices')
+        .select(`
+          *,
+          registered_users!inner(unique_code, phone)
+        `)
+        .order('purchased_at', { ascending: false });
+
+      if (error) throw error;
+      setUserDevices(data || []);
+    } catch (error) {
+      console.error('Error fetching user devices:', error);
+    }
+  };
+
   const handleUpdateBalance = async (userId: string, newBalance: number) => {
     try {
       const { error } = await supabase
@@ -106,6 +125,7 @@ const AdminDashboard = () => {
       toast.success("Balance updated successfully");
       fetchUsers();
       fetchStats();
+      fetchUserDevices();
     } catch (error) {
       console.error('Error updating balance:', error);
       toast.error("Failed to update balance");
@@ -173,6 +193,57 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalDevices}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* User Devices/Investments Table */}
+      <div className="px-6 pb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Investments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User Code</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Device</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Daily Income</TableHead>
+                    <TableHead>Total Income</TableHead>
+                    <TableHead>Purchased</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userDevices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        No investments yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    userDevices.map((device) => (
+                      <TableRow key={device.id}>
+                        <TableCell className="font-medium">
+                          {device.registered_users?.unique_code || 'N/A'}
+                        </TableCell>
+                        <TableCell>{device.registered_users?.phone || 'N/A'}</TableCell>
+                        <TableCell className="font-semibold">{device.device_name}</TableCell>
+                        <TableCell>{device.product_price}</TableCell>
+                        <TableCell>{device.daily_income}</TableCell>
+                        <TableCell>{device.total_income}</TableCell>
+                        <TableCell>
+                          {new Date(device.purchased_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
