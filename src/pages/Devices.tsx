@@ -182,6 +182,16 @@ const Devices = () => {
         .update({ last_payout_at: new Date().toISOString() })
         .eq('id', device.id);
 
+      // Log income record
+      await supabase
+        .from('income_records')
+        .insert({
+          user_id: session.user.id,
+          device_id: device.id,
+          device_name: device.device_name,
+          amount: dailyIncome
+        });
+
       toast({
         title: "Daily income credited",
         description: `${device.daily_income} added to your account`,

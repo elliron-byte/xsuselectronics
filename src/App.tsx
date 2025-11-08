@@ -10,6 +10,10 @@ import Profile from "./pages/Profile";
 import Team from "./pages/Team";
 import Devices from "./pages/Devices";
 import AdminDashboard from "./pages/AdminDashboard";
+import IncomeRecord from "./pages/IncomeRecord";
+import RechargeRecord from "./pages/RechargeRecord";
+import WithdrawRecord from "./pages/WithdrawRecord";
+import BonusCode from "./pages/BonusCode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const App = () => (
           <Route path="/team" element={<Team />} />
           <Route path="/devices" element={<Devices />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/income-record" element={<IncomeRecord />} />
+          <Route path="/recharge-record" element={<RechargeRecord />} />
+          <Route path="/withdraw-record" element={<WithdrawRecord />} />
+          <Route path="/bonus-code" element={<BonusCode />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

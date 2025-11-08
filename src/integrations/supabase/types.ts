@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      income_records: {
+        Row: {
+          amount: number
+          created_at: string
+          device_id: string | null
+          device_name: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          device_id?: string | null
+          device_name: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          device_id?: string | null
+          device_name?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_records_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "user_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recharge_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          new_balance: number
+          previous_balance: number
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          new_balance: number
+          previous_balance: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          new_balance?: number
+          previous_balance?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       registered_users: {
         Row: {
           balance: number | null
@@ -106,6 +168,30 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      withdraw_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
           user_id?: string
         }
         Relationships: []

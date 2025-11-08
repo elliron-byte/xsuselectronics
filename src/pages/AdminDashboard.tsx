@@ -115,12 +115,35 @@ const AdminDashboard = () => {
 
   const handleUpdateBalance = async (userId: string, newBalance: number) => {
     try {
+      // Get current balance first
+      const { data: currentUser } = await supabase
+        .from('registered_users')
+        .select('balance')
+        .eq('user_id', userId)
+        .single();
+
+      const currentBalance = Number(currentUser?.balance) || 0;
+
+      // Update balance
       const { error } = await supabase
         .from('registered_users')
         .update({ balance: newBalance })
         .eq('user_id', userId);
 
       if (error) throw error;
+
+      // Log recharge record if balance increased
+      if (newBalance > currentBalance) {
+        const rechargeAmount = newBalance - currentBalance;
+        await supabase
+          .from('recharge_records')
+          .insert({
+            user_id: userId,
+            amount: rechargeAmount,
+            previous_balance: currentBalance,
+            new_balance: newBalance
+          });
+      }
 
       toast.success("Balance updated successfully");
       fetchUsers();

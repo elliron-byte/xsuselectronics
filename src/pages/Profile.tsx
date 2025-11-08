@@ -35,11 +35,11 @@ const Profile = () => {
   }, [navigate]);
 
   const menuItems = [
-    { icon: Diamond, label: "About Company", color: "text-primary" },
-    { icon: Wallet, label: "Income Record", color: "text-primary" },
-    { icon: Database, label: "Recharge Record", color: "text-primary" },
-    { icon: Database, label: "Withdraw Record", color: "text-primary" },
-    { icon: Shield, label: "Bonus Code", color: "text-primary" },
+    { icon: Diamond, label: "About Company", color: "text-primary", path: "/about" },
+    { icon: Wallet, label: "Income Record", color: "text-primary", path: "/income-record" },
+    { icon: Database, label: "Recharge Record", color: "text-primary", path: "/recharge-record" },
+    { icon: Database, label: "Withdraw Record", color: "text-primary", path: "/withdraw-record" },
+    { icon: Shield, label: "Bonus Code", color: "text-primary", path: "/bonus-code" },
   ];
 
   return (
@@ -99,6 +99,7 @@ const Profile = () => {
             return (
               <button
                 key={index}
+                onClick={() => navigate(item.path)}
                 className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
               >
                 <div className="flex items-center gap-3">
@@ -131,8 +132,11 @@ const Profile = () => {
             <span className="text-xs">Task</span>
           </button>
 
-          {/* Center Action Button */}
-          <button className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+          {/* Center Action Button - Refresh */}
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg"
+          >
             <Headphones className="w-6 h-6 text-white" />
           </button>
 
