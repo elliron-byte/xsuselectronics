@@ -215,7 +215,7 @@ const Withdrawal = () => {
           onClick={handleWithdraw}
           className="w-full h-12 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium"
         >
-          Withdraw money now
+          Withdraw
         </Button>
 
         {/* Withdrawal Instructions */}
