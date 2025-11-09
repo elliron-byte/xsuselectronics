@@ -49,20 +49,17 @@ const UserRecharge = () => {
       // Fetch user phone numbers and emails
       const requestsWithUserData = await Promise.all(
         (data || []).map(async (record) => {
-          // Get phone from registered_users
+          // Get phone and email from registered_users
           const { data: userData } = await supabase
             .from('registered_users')
-            .select('phone')
+            .select('phone, email')
             .eq('user_id', record.user_id)
             .single();
-
-          // Get email from auth.users via admin API
-          const { data: { user } } = await supabase.auth.admin.getUserById(record.user_id);
 
           return {
             ...record,
             user_phone: userData?.phone || 'N/A',
-            user_email: user?.email || 'N/A'
+            user_email: userData?.email || 'N/A'
           };
         })
       );
