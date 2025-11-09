@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogOut, Search, Shield, Users, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import UserRecharge from "./UserRecharge";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -187,8 +189,15 @@ const AdminDashboard = () => {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Tabs defaultValue="overview" className="px-6 py-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="recharge">User Recharge</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -220,8 +229,8 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* User Devices/Investments Table */}
-      <div className="px-6 pb-6">
+          {/* User Devices/Investments Table */}
+          <div>
         <Card>
           <CardHeader>
             <CardTitle>User Investments</CardTitle>
@@ -271,8 +280,8 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Users Table */}
-      <div className="px-6 pb-6">
+          {/* Users Table */}
+          <div>
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -362,8 +371,14 @@ const AdminDashboard = () => {
               </div>
             )}
           </CardContent>
-        </Card>
-      </div>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="recharge">
+          <UserRecharge />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

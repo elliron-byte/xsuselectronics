@@ -74,25 +74,34 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          e_wallet_number: string | null
           id: string
           new_balance: number
           previous_balance: number
+          status: string | null
+          transaction_id: string | null
           user_id: string
         }
         Insert: {
           amount: number
           created_at?: string
+          e_wallet_number?: string | null
           id?: string
           new_balance: number
           previous_balance: number
+          status?: string | null
+          transaction_id?: string | null
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          e_wallet_number?: string | null
           id?: string
           new_balance?: number
           previous_balance?: number
+          status?: string | null
+          transaction_id?: string | null
           user_id?: string
         }
         Relationships: []

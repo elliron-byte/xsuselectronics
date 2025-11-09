@@ -3,15 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const PaymentConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const amount = location.state?.amount || 0;
   const eWalletNumber = location.state?.eWalletNumber || "";
   
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
   const [transactionId, setTransactionId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -37,13 +41,70 @@ const PaymentConfirmation = () => {
     navigator.clipboard.writeText(text);
   };
 
-  const handleGetResult = () => {
+  const handleGetResult = async () => {
     if (!transactionId || transactionId.length < 11) {
-      alert("Please enter a valid Transaction ID (11 or 16 digits)");
+      toast({
+        title: "Invalid Transaction ID",
+        description: "Please enter a valid Transaction ID (11 or 16 digits)",
+        variant: "destructive"
+      });
       return;
     }
-    // Process the transaction
-    navigate('/dashboard');
+
+    setIsSubmitting(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Please log in to continue",
+          variant: "destructive"
+        });
+        navigate('/login');
+        return;
+      }
+
+      // Get current balance
+      const { data: userData, error: userError } = await supabase
+        .from('registered_users')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      if (userError) throw userError;
+
+      // Insert recharge record
+      const { error: insertError } = await supabase
+        .from('recharge_records')
+        .insert({
+          user_id: user.id,
+          amount: amount,
+          previous_balance: userData?.balance || 0,
+          new_balance: userData?.balance || 0,
+          transaction_id: transactionId,
+          e_wallet_number: `0${eWalletNumber}`,
+          status: 'pending'
+        });
+
+      if (insertError) throw insertError;
+
+      toast({
+        title: "Request Submitted",
+        description: "Your recharge request has been submitted and is pending approval",
+      });
+
+      navigate('/recharge-record');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit recharge request",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -141,9 +202,10 @@ const PaymentConfirmation = () => {
 
           <Button
             onClick={handleGetResult}
+            disabled={isSubmitting}
             className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
           >
-            Get the result
+            {isSubmitting ? "Processing..." : "Get the result"}
           </Button>
 
           {/* E-wallet Display */}
