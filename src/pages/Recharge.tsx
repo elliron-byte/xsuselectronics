@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +9,7 @@ const Recharge = () => {
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
+  const [showReminder, setShowReminder] = useState(false);
 
   const quickAmounts = [40, 110, 220, 400, 600];
 
@@ -28,8 +30,12 @@ const Recharge = () => {
       alert("Please enter a valid amount (minimum 40 GHS)");
       return;
     }
-    // Handle deposit logic here
-    console.log("Deposit amount:", amount);
+    setShowReminder(true);
+  };
+
+  const handleContinueToRepay = () => {
+    const amount = parseInt(customAmount);
+    navigate('/operator-selection', { state: { amount } });
   };
 
   return (
@@ -125,6 +131,38 @@ const Recharge = () => {
           </div>
         </div>
       </div>
+
+      {/* Reminder Dialog */}
+      <Dialog open={showReminder} onOpenChange={setShowReminder}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reminder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-pink-50 p-3 rounded-lg">
+              <p className="text-sm">
+                👉 <span className="text-red-500 font-semibold">Please use MoMo pay or Vodafone (Telecel Play Ghana) for payment</span>
+              </p>
+            </div>
+            <p className="text-sm">
+              After completing the repayment, please <span className="text-primary font-semibold">backfill</span> your{" "}
+              <span className="text-primary font-semibold">Transaction ID (Txn ID 11 or 16 digits)</span>.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              If you do not backfill, your repayment will not be review quickly
+            </p>
+            <p className="text-sm font-semibold">
+              Do not close the APP before backfill
+            </p>
+            <Button 
+              onClick={handleContinueToRepay}
+              className="w-full bg-primary hover:bg-primary/90 text-white"
+            >
+              I KNOW & CONTINUE TO REPAY
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
