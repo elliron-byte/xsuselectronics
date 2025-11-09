@@ -13,6 +13,7 @@ const Devices = () => {
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [canCheckIn, setCanCheckIn] = useState(true);
   const [deviceTimers, setDeviceTimers] = useState<Record<string, string>>({});
+  const [processingDevices, setProcessingDevices] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchUserDevices();
@@ -139,8 +140,9 @@ const Devices = () => {
       const nextPayout = lastPayout + 24 * 60 * 60 * 1000;
       const diff = nextPayout - now;
 
-      if (diff <= 0) {
-        // Timer expired, credit the daily income
+      if (diff <= 0 && !processingDevices.has(device.id)) {
+        // Timer expired, credit the daily income only once
+        setProcessingDevices(prev => new Set(prev).add(device.id));
         await creditDailyIncome(device);
         newTimers[device.id] = "Crediting...";
       } else {
@@ -197,10 +199,20 @@ const Devices = () => {
         description: `${device.daily_income} added to your account`,
       });
 
-      // Refresh devices
+      // Refresh devices and remove from processing set
       await fetchUserDevices();
+      setProcessingDevices(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(device.id);
+        return newSet;
+      });
     } catch (error) {
       console.error('Error crediting daily income:', error);
+      setProcessingDevices(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(device.id);
+        return newSet;
+      });
     }
   };
 
