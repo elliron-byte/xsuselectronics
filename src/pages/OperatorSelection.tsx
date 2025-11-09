@@ -10,17 +10,18 @@ const OperatorSelection = () => {
   const amount = location.state?.amount || 0;
   
   const [operator, setOperator] = useState("");
+  const [prefix, setPrefix] = useState("24");
   const [eWalletNumber, setEWalletNumber] = useState("");
 
   const handleSubmit = () => {
-    if (!operator || eWalletNumber.length !== 9) {
-      alert("Please select an operator and enter a valid 9-digit e-wallet number");
+    if (!operator || eWalletNumber.length !== 7) {
+      alert("Please select an operator and enter a valid 7-digit e-wallet number");
       return;
     }
     navigate('/payment-confirmation', { 
       state: { 
         amount, 
-        eWalletNumber: "0" + eWalletNumber 
+        eWalletNumber: `0${prefix}${eWalletNumber}`
       } 
     });
   };
@@ -68,20 +69,35 @@ const OperatorSelection = () => {
               <div className="flex h-10 items-center justify-center px-3 bg-muted rounded-l-md border border-r-0 border-input">
                 <span className="text-sm font-medium">0</span>
               </div>
+              <Select value={prefix} onValueChange={setPrefix}>
+                <SelectTrigger className="w-20 rounded-none border-l-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">24</SelectItem>
+                  <SelectItem value="27">27</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="54">54</SelectItem>
+                  <SelectItem value="55">55</SelectItem>
+                  <SelectItem value="56">56</SelectItem>
+                  <SelectItem value="57">57</SelectItem>
+                  <SelectItem value="59">59</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 type="text"
-                placeholder="Enter 9 digits"
+                placeholder="Enter 7 digits"
                 value={eWalletNumber}
-                onChange={(e) => setEWalletNumber(e.target.value.replace(/\D/g, "").slice(0, 9))}
+                onChange={(e) => setEWalletNumber(e.target.value.replace(/\D/g, "").slice(0, 7))}
                 className="flex-1 rounded-l-none"
-                maxLength={9}
+                maxLength={7}
               />
             </div>
           </div>
 
           <Button
             onClick={handleSubmit}
-            disabled={!operator || eWalletNumber.length !== 9}
+            disabled={!operator || eWalletNumber.length !== 7}
             className="w-full bg-primary hover:bg-primary/90 text-white"
           >
             CONFIRMED THEN SUBMIT

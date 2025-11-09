@@ -84,7 +84,7 @@ const PaymentConfirmation = () => {
           previous_balance: userData?.balance || 0,
           new_balance: userData?.balance || 0,
           transaction_id: transactionId,
-          e_wallet_number: `0${eWalletNumber}`,
+          e_wallet_number: eWalletNumber,
           status: 'pending'
         });
 
