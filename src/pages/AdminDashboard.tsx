@@ -113,7 +113,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateBalance = async (userId: string, newBalance: number) => {
+  const handleUpdateBalance = async (userId: string, amountToAdd: number) => {
     try {
       // Get current balance first
       const { data: currentUser } = await supabase
@@ -123,6 +123,7 @@ const AdminDashboard = () => {
         .single();
 
       const currentBalance = Number(currentUser?.balance) || 0;
+      const newBalance = currentBalance + amountToAdd;
 
       // Update balance
       const { error } = await supabase
@@ -132,20 +133,19 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
-      // Log recharge record if balance increased
-      if (newBalance > currentBalance) {
-        const rechargeAmount = newBalance - currentBalance;
+      // Log recharge record
+      if (amountToAdd > 0) {
         await supabase
           .from('recharge_records')
           .insert({
             user_id: userId,
-            amount: rechargeAmount,
+            amount: amountToAdd,
             previous_balance: currentBalance,
             new_balance: newBalance
           });
       }
 
-      toast.success("Balance updated successfully");
+      toast.success(`Added GHS ${amountToAdd} to balance`);
       fetchUsers();
       fetchStats();
       fetchUserDevices();
@@ -298,7 +298,8 @@ const AdminDashboard = () => {
                     <TableRow>
                       <TableHead>Unique Code</TableHead>
                       <TableHead>Phone</TableHead>
-                      <TableHead>Balance</TableHead>
+                      <TableHead>Current Balance</TableHead>
+                      <TableHead>Add Amount</TableHead>
                       <TableHead>Invitation Code</TableHead>
                       <TableHead>Created At</TableHead>
                       <TableHead>Actions</TableHead>
@@ -307,7 +308,7 @@ const AdminDashboard = () => {
                   <TableBody>
                     {filteredUsers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No users found
                         </TableCell>
                       </TableRow>
@@ -316,18 +317,24 @@ const AdminDashboard = () => {
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">{user.unique_code || 'N/A'}</TableCell>
                           <TableCell>{user.phone || 'N/A'}</TableCell>
+                          <TableCell className="font-semibold">
+                            GHS {Number(user.balance || 0).toFixed(2)}
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Input
                                 type="number"
-                                defaultValue={user.balance || 0}
-                                onBlur={(e) => {
-                                  const newBalance = parseFloat(e.target.value);
-                                  if (!isNaN(newBalance) && newBalance !== user.balance) {
-                                    handleUpdateBalance(user.user_id, newBalance);
+                                placeholder="Amount to add"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const amountToAdd = parseFloat((e.target as HTMLInputElement).value);
+                                    if (!isNaN(amountToAdd) && amountToAdd > 0) {
+                                      handleUpdateBalance(user.user_id, amountToAdd);
+                                      (e.target as HTMLInputElement).value = '';
+                                    }
                                   }
                                 }}
-                                className="w-24"
+                                className="w-32"
                               />
                             </div>
                           </TableCell>
@@ -339,7 +346,10 @@ const AdminDashboard = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleUpdateBalance(user.user_id, Number(user.balance) || 0)}
+                              onClick={() => {
+                                fetchUsers();
+                                fetchStats();
+                              }}
                             >
                               Refresh
                             </Button>

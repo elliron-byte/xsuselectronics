@@ -154,7 +154,7 @@ const Profile = () => {
             className="flex flex-col items-center gap-1 py-2 px-3 text-muted-foreground"
           >
             <ShoppingCart className="w-6 h-6" />
-            <span className="text-xs">Task</span>
+            <span className="text-xs">Devices</span>
           </button>
 
           {/* Center Action Button - Refresh */}
