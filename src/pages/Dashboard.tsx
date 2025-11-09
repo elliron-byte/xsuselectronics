@@ -205,7 +205,7 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-5 gap-3">
-          <button className="flex flex-col items-center gap-2">
+          <button onClick={() => navigate("/recharge")} className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <Wallet className="w-6 h-6" />
             </div>
