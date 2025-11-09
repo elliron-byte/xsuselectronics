@@ -14,16 +14,265 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      income_records: {
+        Row: {
+          amount: number
+          created_at: string
+          device_id: string | null
+          device_name: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          device_id?: string | null
+          device_name: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          device_id?: string | null
+          device_name?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_records_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "user_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_limits: {
+        Row: {
+          attempt_count: number
+          operation: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          attempt_count?: number
+          operation: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          attempt_count?: number
+          operation?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      recharge_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          new_balance: number
+          previous_balance: number
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          new_balance: number
+          previous_balance: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          new_balance?: number
+          previous_balance?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      registered_users: {
+        Row: {
+          balance: number | null
+          created_at: string
+          id: string
+          invitation_code: string | null
+          last_checkin_at: string | null
+          password: string | null
+          phone: string | null
+          unique_code: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          invitation_code?: string | null
+          last_checkin_at?: string | null
+          password?: string | null
+          phone?: string | null
+          unique_code?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          invitation_code?: string | null
+          last_checkin_at?: string | null
+          password?: string | null
+          phone?: string | null
+          unique_code?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_devices: {
+        Row: {
+          daily_income: string
+          device_name: string
+          device_number: number
+          id: string
+          last_payout_at: string | null
+          product_price: string
+          purchased_at: string
+          total_income: string
+          user_id: string | null
+          user_phone: string
+        }
+        Insert: {
+          daily_income: string
+          device_name: string
+          device_number: number
+          id?: string
+          last_payout_at?: string | null
+          product_price: string
+          purchased_at?: string
+          total_income: string
+          user_id?: string | null
+          user_phone: string
+        }
+        Update: {
+          daily_income?: string
+          device_name?: string
+          device_number?: number
+          id?: string
+          last_payout_at?: string | null
+          product_price?: string
+          purchased_at?: string
+          total_income?: string
+          user_id?: string | null
+          user_phone?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      withdraw_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawal_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_rate_limit: {
+        Args: {
+          p_max_attempts: number
+          p_operation: string
+          p_user_id: string
+          p_window_minutes: number
+        }
+        Returns: boolean
+      }
+      generate_unique_code: { Args: never; Returns: string }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +399,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
