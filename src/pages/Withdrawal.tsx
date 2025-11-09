@@ -103,6 +103,22 @@ const Withdrawal = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
+    // Check if user has invested in any device
+    const { data: userDevices } = await supabase
+      .from('user_devices')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .limit(1);
+
+    if (!userDevices || userDevices.length === 0) {
+      toast({
+        title: "Investment required",
+        description: "You must invest in a device before you can withdraw money",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       // Deduct balance
       const newBalance = balance - amount;
