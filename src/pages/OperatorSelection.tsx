@@ -63,14 +63,20 @@ const OperatorSelection = () => {
 
           {/* E-wallet Number Input */}
           <div className="space-y-2">
-            <Input
-              type="text"
-              placeholder="E-wallet Number"
-              value={eWalletNumber}
-              onChange={(e) => setEWalletNumber(e.target.value.replace(/\D/g, "").slice(0, 9))}
-              className="w-full"
-              maxLength={9}
-            />
+            <label className="text-sm font-medium">E-wallet Number</label>
+            <div className="flex items-center gap-1">
+              <div className="flex h-10 items-center justify-center px-3 bg-muted rounded-l-md border border-r-0 border-input">
+                <span className="text-sm font-medium">0</span>
+              </div>
+              <Input
+                type="text"
+                placeholder="Enter 9 digits"
+                value={eWalletNumber}
+                onChange={(e) => setEWalletNumber(e.target.value.replace(/\D/g, "").slice(0, 9))}
+                className="flex-1 rounded-l-none"
+                maxLength={9}
+              />
+            </div>
           </div>
 
           <Button

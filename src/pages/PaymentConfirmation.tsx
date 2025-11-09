@@ -108,9 +108,9 @@ const PaymentConfirmation = () => {
               <div className="bg-red-500 text-white w-10 h-10 rounded flex items-center justify-center font-bold text-xl">
                 t
               </div>
-              <span className="text-xl font-bold flex-1">0201787392</span>
+              <span className="text-xl font-bold flex-1">0266716101</span>
               <button 
-                onClick={() => handleCopy("0201787392")}
+                onClick={() => handleCopy("0266716101")}
                 className="text-primary text-sm"
               >
                 📋 Copy
