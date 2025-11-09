@@ -16,6 +16,7 @@ interface RechargeRequest {
   status: string;
   created_at: string;
   user_phone?: string;
+  user_email?: string;
 }
 
 const UserRecharge = () => {
@@ -45,23 +46,28 @@ const UserRecharge = () => {
 
       if (error) throw error;
 
-      // Fetch user phone numbers
-      const requestsWithPhone = await Promise.all(
+      // Fetch user phone numbers and emails
+      const requestsWithUserData = await Promise.all(
         (data || []).map(async (record) => {
+          // Get phone from registered_users
           const { data: userData } = await supabase
             .from('registered_users')
             .select('phone')
             .eq('user_id', record.user_id)
             .single();
 
+          // Get email from auth.users via admin API
+          const { data: { user } } = await supabase.auth.admin.getUserById(record.user_id);
+
           return {
             ...record,
-            user_phone: userData?.phone || 'N/A'
+            user_phone: userData?.phone || 'N/A',
+            user_email: user?.email || 'N/A'
           };
         })
       );
 
-      setRechargeRequests(requestsWithPhone);
+      setRechargeRequests(requestsWithUserData);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -172,6 +178,7 @@ const UserRecharge = () => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Email</TableHead>
               <TableHead>Phone Number</TableHead>
               <TableHead>E-Wallet</TableHead>
               <TableHead>Transaction ID</TableHead>
@@ -185,10 +192,11 @@ const UserRecharge = () => {
           <TableBody>
             {rechargeRequests.map((request) => (
               <TableRow key={request.id}>
+                <TableCell className="font-medium">{request.user_email}</TableCell>
                 <TableCell>{request.user_phone}</TableCell>
                 <TableCell>{request.e_wallet_number}</TableCell>
-                <TableCell>{request.transaction_id}</TableCell>
-                <TableCell>GHS {request.amount}</TableCell>
+                <TableCell className="font-mono text-sm">{request.transaction_id}</TableCell>
+                <TableCell className="font-semibold">GHS {request.amount}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded text-xs font-semibold ${
                     request.status === 'successful' ? 'bg-green-100 text-green-800' :
