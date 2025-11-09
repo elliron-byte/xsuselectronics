@@ -140,7 +140,7 @@ const Dashboard = () => {
 
       // Calculate new balance - deduct investment price and signup bonus (20 GHS) on first investment
       const signupBonusDeduction = isFirstInvestment ? 20 : 0;
-      const newBalance = currentBalance - investment.price - signupBonusDeduction;
+      const newBalance = Math.max(0, currentBalance - investment.price - signupBonusDeduction);
       
       const { error: balanceError } = await supabase
         .from('registered_users')
