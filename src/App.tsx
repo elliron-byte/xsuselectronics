@@ -14,6 +14,8 @@ import IncomeRecord from "./pages/IncomeRecord";
 import RechargeRecord from "./pages/RechargeRecord";
 import WithdrawRecord from "./pages/WithdrawRecord";
 import BonusCode from "./pages/BonusCode";
+import Withdrawal from "./pages/Withdrawal";
+import WithdrawalAccounts from "./pages/WithdrawalAccounts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/recharge-record" element={<RechargeRecord />} />
           <Route path="/withdraw-record" element={<WithdrawRecord />} />
           <Route path="/bonus-code" element={<BonusCode />} />
+          <Route path="/withdrawal" element={<Withdrawal />} />
+          <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

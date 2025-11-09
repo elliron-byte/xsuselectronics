@@ -210,7 +210,7 @@ const Dashboard = () => {
             </div>
             <span className="text-xs">Recharge</span>
           </button>
-          <button className="flex flex-col items-center gap-2">
+          <button onClick={() => navigate("/withdrawal")} className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <ArrowDownToLine className="w-6 h-6" />
             </div>
