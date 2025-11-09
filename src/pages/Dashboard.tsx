@@ -122,15 +122,6 @@ const Dashboard = () => {
     }
 
     try {
-      // Check if this is the user's first investment
-      const { data: existingDevices } = await supabase
-        .from('user_devices')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .limit(1);
-
-      const isFirstInvestment = !existingDevices || existingDevices.length === 0;
-
       // Get user phone for the device record
       const { data: userPhoneData } = await supabase
         .from('registered_users')
@@ -138,9 +129,8 @@ const Dashboard = () => {
         .eq('user_id', session.user.id)
         .single();
 
-      // Calculate new balance - deduct investment price and signup bonus (20 GHS) on first investment
-      const signupBonusDeduction = isFirstInvestment ? 20 : 0;
-      const newBalance = Math.max(0, currentBalance - investment.price - signupBonusDeduction);
+      // Calculate new balance - deduct investment price only
+      const newBalance = currentBalance - investment.price;
       
       const { error: balanceError } = await supabase
         .from('registered_users')
