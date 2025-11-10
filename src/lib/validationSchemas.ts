@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const registrationSchema = z.object({
   phone: z.string()
     .length(10, "Phone must be 10 digits")
-    .regex(/^(025|024|055|054|027|026)/, "Invalid phone prefix")
+    .regex(/^(020|024|025|026|027|050|054|055|056|059)/, "Invalid phone prefix")
     .regex(/^\d+$/, "Phone must contain only numbers"),
   email: z.string()
     .email("Invalid email address")
