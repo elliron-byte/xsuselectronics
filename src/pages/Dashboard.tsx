@@ -13,43 +13,56 @@ const Dashboard = () => {
 
   const [session, setSession] = useState<any>(null);
 
+  const fetchUserData = async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    
+    if (!currentSession) {
+      navigate('/login');
+      return;
+    }
+
+    setSession(currentSession);
+
+    const { data } = await supabase
+      .from('registered_users')
+      .select('unique_code, balance')
+      .eq('user_id', currentSession.user.id)
+      .single();
+
+    if (data) {
+      setUserData({ 
+        phone: currentSession.user.email || '',
+        uniqueCode: data.unique_code || '00000',
+        balance: Number(data.balance) || 20
+      });
+    }
+  };
+
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!currentSession) {
-        navigate('/login');
-        return;
-      }
-
-      setSession(currentSession);
-
-      const { data } = await supabase
-        .from('registered_users')
-        .select('unique_code, balance')
-        .eq('user_id', currentSession.user.id)
-        .single();
-
-      if (data) {
-        setUserData({ 
-          phone: currentSession.user.email || '',
-          uniqueCode: data.unique_code || '00000',
-          balance: Number(data.balance) || 20
-        });
-      }
-    };
-
-    checkAuth();
+    fetchUserData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate('/login');
       } else {
         setSession(session);
+        fetchUserData();
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Refetch balance when page becomes visible
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchUserData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [navigate]);
 
   const investments = [
