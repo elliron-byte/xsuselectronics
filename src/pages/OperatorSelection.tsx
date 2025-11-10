@@ -74,13 +74,15 @@ const OperatorSelection = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="20">20</SelectItem>
                   <SelectItem value="24">24</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="26">26</SelectItem>
                   <SelectItem value="27">27</SelectItem>
                   <SelectItem value="50">50</SelectItem>
                   <SelectItem value="54">54</SelectItem>
                   <SelectItem value="55">55</SelectItem>
                   <SelectItem value="56">56</SelectItem>
-                  <SelectItem value="57">57</SelectItem>
                   <SelectItem value="59">59</SelectItem>
                 </SelectContent>
               </Select>
