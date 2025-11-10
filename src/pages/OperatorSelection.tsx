@@ -73,7 +73,7 @@ const OperatorSelection = () => {
                 placeholder="Enter 9 digits"
                 value={eWalletNumber}
                 onChange={(e) => setEWalletNumber(e.target.value.replace(/\D/g, "").slice(0, 9))}
-                className="flex-1 rounded-l-md"
+                className="flex-1 rounded-l-none"
                 maxLength={9}
               />
             </div>
