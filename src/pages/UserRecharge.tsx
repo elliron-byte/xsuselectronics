@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Search } from "lucide-react";
 
 interface RechargeRequest {
   id: string;
@@ -23,6 +24,7 @@ const UserRecharge = () => {
   const [rechargeRequests, setRechargeRequests] = useState<RechargeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [fundingAmounts, setFundingAmounts] = useState<{ [key: string]: string }>({});
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -164,11 +166,29 @@ const UserRecharge = () => {
     return <div className="p-6">Loading...</div>;
   }
 
+  const filteredRequests = rechargeRequests.filter(request => 
+    request.transaction_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.user_phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.e_wallet_number?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">User Recharge Requests</h1>
-        <Button onClick={fetchRechargeRequests}>Refresh</Button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by transaction ID, phone, email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-80"
+            />
+          </div>
+          <Button onClick={fetchRechargeRequests}>Refresh</Button>
+        </div>
       </div>
 
       <Card className="p-6">
@@ -187,7 +207,7 @@ const UserRecharge = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rechargeRequests.map((request) => (
+            {filteredRequests.map((request) => (
               <TableRow key={request.id}>
                 <TableCell className="font-medium">{request.user_email}</TableCell>
                 <TableCell>{request.user_phone}</TableCell>
@@ -244,9 +264,9 @@ const UserRecharge = () => {
           </TableBody>
         </Table>
 
-        {rechargeRequests.length === 0 && (
+        {filteredRequests.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
-            No recharge requests found
+            {searchTerm ? "No matching recharge requests found" : "No recharge requests found"}
           </div>
         )}
       </Card>
