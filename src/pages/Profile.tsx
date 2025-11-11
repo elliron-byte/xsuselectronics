@@ -91,7 +91,10 @@ const Profile = () => {
               <div className="text-sm text-muted-foreground mb-1">Account Balance</div>
               <div className="text-3xl font-bold text-primary">GHS {userData?.balance || 20}</div>
             </div>
-            <Button className="bg-primary hover:bg-primary/90 text-white px-6 h-12 rounded-xl">
+            <Button 
+              onClick={() => navigate('/recharge')}
+              className="bg-primary hover:bg-primary/90 text-white px-6 h-12 rounded-xl"
+            >
               Recharge 🔔
             </Button>
           </div>

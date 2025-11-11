@@ -19,6 +19,7 @@ import WithdrawalAccounts from "./pages/WithdrawalAccounts";
 import Recharge from "./pages/Recharge";
 import OperatorSelection from "./pages/OperatorSelection";
 import PaymentConfirmation from "./pages/PaymentConfirmation";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/recharge" element={<Recharge />} />
           <Route path="/operator-selection" element={<OperatorSelection />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
