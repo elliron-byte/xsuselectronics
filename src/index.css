@@ -36,6 +36,9 @@ All colors MUST be HSL.
     --input: 0 0% 96%;
     --ring: 140 60% 45%;
 
+    --cyan-deep: 190 70% 40%;
+    --cyan-deep-foreground: 0 0% 100%;
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -83,6 +86,8 @@ All colors MUST be HSL.
     --border: 0 0% 20%;
     --input: 0 0% 15%;
     --ring: 140 60% 45%;
+    --cyan-deep: 190 70% 40%;
+    --cyan-deep-foreground: 0 0% 100%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
