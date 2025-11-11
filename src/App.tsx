@@ -20,6 +20,7 @@ import Recharge from "./pages/Recharge";
 import OperatorSelection from "./pages/OperatorSelection";
 import PaymentConfirmation from "./pages/PaymentConfirmation";
 import About from "./pages/About";
+import CustomerService from "./pages/CustomerService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/operator-selection" element={<OperatorSelection />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
           <Route path="/about" element={<About />} />
+          <Route path="/customer-service" element={<CustomerService />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

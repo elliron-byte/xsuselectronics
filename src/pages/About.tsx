@@ -13,8 +13,7 @@ const About = () => {
   };
 
   const handleTelegramClick = () => {
-    // Add your Telegram group link here
-    window.open('https://t.me/your_group', '_blank');
+    navigate('/customer-service');
   };
 
   if (!isOpen) return null;
