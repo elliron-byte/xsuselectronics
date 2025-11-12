@@ -1,1 +1,4 @@
 project_id = "poguyzhsrzawauujamgk"
+
+[functions.process-device-income]
+verify_jwt = false
