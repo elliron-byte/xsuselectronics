@@ -115,36 +115,29 @@ const UserRecharge = () => {
     }
 
     try {
-      // Get current user balance
-      const { data: userData, error: userError } = await supabase
-        .from('registered_users')
-        .select('balance')
-        .eq('user_id', record.user_id)
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-      if (userError) throw userError;
+      // Call secure database function with admin validation
+      const { data, error } = await supabase.rpc('admin_add_balance', {
+        p_admin_user_id: session.user.id,
+        p_target_user_id: record.user_id,
+        p_amount: fundAmount,
+        p_transaction_id: record.transaction_id,
+        p_e_wallet_number: record.e_wallet_number
+      });
 
-      const currentBalance = userData?.balance || 0;
-      const newBalance = parseFloat(currentBalance.toString()) + fundAmount;
+      if (error) throw error;
 
-      // Update user balance
-      const { error: updateError } = await supabase
-        .from('registered_users')
-        .update({ balance: newBalance })
-        .eq('user_id', record.user_id);
-
-      if (updateError) throw updateError;
-
-      // Update recharge record
-      const { error: rechargeError } = await supabase
-        .from('recharge_records')
-        .update({
-          new_balance: newBalance,
-          status: 'successful'
-        })
-        .eq('id', record.id);
-
-      if (rechargeError) throw rechargeError;
+      const result = data as any;
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive"
+        });
+        return;
+      }
 
       toast({
         title: "Success",

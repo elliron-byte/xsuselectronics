@@ -73,24 +73,6 @@ const Withdrawal = () => {
   const handleWithdraw = async () => {
     const amount = Number(withdrawAmount);
     
-    if (!amount || amount < 20) {
-      toast({
-        title: "Invalid amount",
-        description: "Minimum withdrawal amount is GHS 20",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (amount > balance) {
-      toast({
-        title: "Insufficient balance",
-        description: `Your balance is GHS ${balance.toFixed(2)}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
     if (!selectedAccount) {
       toast({
         title: "No account selected",
@@ -103,49 +85,31 @@ const Withdrawal = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    // Check if user has invested in any device
-    const { data: userDevices } = await supabase
-      .from('user_devices')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .limit(1);
-
-    if (!userDevices || userDevices.length === 0) {
-      toast({
-        title: "Investment required",
-        description: "You must invest in a device before you can withdraw money",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
-      // Deduct balance
-      const newBalance = balance - amount;
-      const { error: balanceError } = await supabase
-        .from('registered_users')
-        .update({ balance: newBalance })
-        .eq('user_id', session.user.id);
+      // Call secure database function with server-side validation
+      const { data, error } = await supabase.rpc('process_withdrawal', {
+        p_user_id: session.user.id,
+        p_amount: amount
+      });
 
-      if (balanceError) throw balanceError;
+      if (error) throw error;
 
-      // Create withdrawal record
-      const { error: withdrawError } = await supabase
-        .from('withdraw_records')
-        .insert({
-          user_id: session.user.id,
-          amount: amount,
-          status: 'pending'
+      const result = data as any;
+      if (!result.success) {
+        toast({
+          title: "Withdrawal failed",
+          description: result.error,
+          variant: "destructive"
         });
-
-      if (withdrawError) throw withdrawError;
+        return;
+      }
 
       toast({
         title: "Withdrawal submitted",
         description: "Your withdrawal request has been submitted and is pending approval",
       });
 
-      setBalance(newBalance);
+      setBalance(result.new_balance);
       setWithdrawAmount("");
       setAmountReceived(0);
       setSelectedAccount(null);

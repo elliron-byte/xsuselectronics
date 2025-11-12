@@ -123,17 +123,6 @@ const Dashboard = () => {
       return;
     }
 
-    const currentBalance = userData?.balance || 0;
-    
-    if (currentBalance < investment.price) {
-      toast({
-        title: "Insufficient balance",
-        description: `You need GHS ${investment.price} to invest in this device. Your current balance is GHS ${currentBalance}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       // Get user phone for the device record
       const { data: userPhoneData } = await supabase
@@ -142,37 +131,35 @@ const Dashboard = () => {
         .eq('user_id', session.user.id)
         .single();
 
-      // Calculate new balance - deduct investment price only
-      const newBalance = currentBalance - investment.price;
-      
-      const { error: balanceError } = await supabase
-        .from('registered_users')
-        .update({ balance: newBalance })
-        .eq('user_id', session.user.id);
+      // Call secure database function with server-side validation
+      const { data, error } = await supabase.rpc('process_device_purchase', {
+        p_user_id: session.user.id,
+        p_device_name: investment.name,
+        p_product_price: investment.price,
+        p_daily_income: parseFloat(investment.dailyEarnings.replace(/[^\d.-]/g, '')),
+        p_total_income: parseFloat(investment.totalGain.replace(/[^\d.-]/g, '')),
+        p_device_number: investment.id,
+        p_user_phone: userPhoneData?.phone || ''
+      });
 
-      if (balanceError) throw balanceError;
+      if (error) throw error;
 
-      // Add device to user_devices
-      const { error: deviceError } = await supabase
-        .from('user_devices')
-        .insert({
-          user_id: session.user.id,
-          user_phone: userPhoneData?.phone || '',
-          device_name: investment.name,
-          device_number: investment.id,
-          product_price: investment.priceDisplay,
-          daily_income: investment.dailyEarnings,
-          total_income: investment.totalGain
+      const result = data as any;
+      if (!result.success) {
+        toast({
+          title: "Investment failed",
+          description: result.error,
+          variant: "destructive"
         });
-
-      if (deviceError) throw deviceError;
+        return;
+      }
 
       // Update local state
-      setUserData(prev => prev ? { ...prev, balance: newBalance } : null);
+      setUserData(prev => prev ? { ...prev, balance: result.new_balance } : null);
 
       toast({
         title: "Investment successful!",
-        description: `You have successfully invested in ${investment.name}. Your new balance is GHS ${newBalance}`,
+        description: `You have successfully invested in ${investment.name}. Your new balance is GHS ${result.new_balance}`,
       });
     } catch (error) {
       console.error('Investment error:', error);

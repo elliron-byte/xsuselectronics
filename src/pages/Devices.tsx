@@ -95,24 +95,22 @@ const Devices = () => {
     if (!session) return;
 
     try {
-      const { data: userData } = await supabase
-        .from('registered_users')
-        .select('balance')
-        .eq('user_id', session.user.id)
-        .single();
-
-      const currentBalance = Number(userData?.balance) || 0;
-      const newBalance = currentBalance + 1;
-
-      const { error } = await supabase
-        .from('registered_users')
-        .update({ 
-          balance: newBalance,
-          last_checkin_at: new Date().toISOString()
-        })
-        .eq('user_id', session.user.id);
+      // Call secure database function with server-side validation
+      const { data, error } = await supabase.rpc('process_checkin', {
+        p_user_id: session.user.id
+      });
 
       if (error) throw error;
+
+      const result = data as any;
+      if (!result.success) {
+        toast({
+          title: "Check-in failed",
+          description: result.error,
+          variant: "destructive"
+        });
+        return;
+      }
 
       toast({
         title: "Daily check in successful",
@@ -140,11 +138,8 @@ const Devices = () => {
       const nextPayout = lastPayout + 24 * 60 * 60 * 1000;
       const diff = nextPayout - now;
 
-      if (diff <= 0 && !processingDevices.has(device.id)) {
-        // Timer expired, credit the daily income only once
-        setProcessingDevices(prev => new Set(prev).add(device.id));
-        await creditDailyIncome(device);
-        newTimers[device.id] = "Crediting...";
+      if (diff <= 0) {
+        newTimers[device.id] = "Ready to claim";
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -154,66 +149,6 @@ const Devices = () => {
     }
 
     setDeviceTimers(newTimers);
-  };
-
-  const creditDailyIncome = async (device: any) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Get current balance
-      const { data: userData } = await supabase
-        .from('registered_users')
-        .select('balance')
-        .eq('user_id', session.user.id)
-        .single();
-
-      const currentBalance = Number(userData?.balance) || 0;
-      const dailyIncome = parseFloat(device.daily_income.replace(/[^\d.-]/g, ''));
-      const newBalance = currentBalance + dailyIncome;
-
-      // Update balance
-      await supabase
-        .from('registered_users')
-        .update({ balance: newBalance })
-        .eq('user_id', session.user.id);
-
-      // Update last payout time
-      await supabase
-        .from('user_devices')
-        .update({ last_payout_at: new Date().toISOString() })
-        .eq('id', device.id);
-
-      // Log income record
-      await supabase
-        .from('income_records')
-        .insert({
-          user_id: session.user.id,
-          device_id: device.id,
-          device_name: device.device_name,
-          amount: dailyIncome
-        });
-
-      toast({
-        title: "Daily income credited",
-        description: `${device.daily_income} added to your account`,
-      });
-
-      // Refresh devices and remove from processing set
-      await fetchUserDevices();
-      setProcessingDevices(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(device.id);
-        return newSet;
-      });
-    } catch (error) {
-      console.error('Error crediting daily income:', error);
-      setProcessingDevices(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(device.id);
-        return newSet;
-      });
-    }
   };
 
   const fetchUserDevices = async () => {

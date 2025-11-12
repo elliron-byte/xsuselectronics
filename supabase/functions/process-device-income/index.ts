@@ -56,73 +56,27 @@ Deno.serve(async (req) => {
     let errorCount = 0;
     const errors: string[] = [];
 
-    // Process each device
+    // Process each device using secure database function
     for (const device of eligibleDevices as Device[]) {
       try {
-        const incomeAmount = parseFloat(device.daily_income);
-        
-        // Get current user balance with row lock
-        const { data: userData, error: userError } = await supabase
-          .from('registered_users')
-          .select('balance')
-          .eq('user_id', device.user_id)
-          .single();
+        // Call the secure credit_device_income function with proper locking
+        const { data: result, error } = await supabase.rpc('credit_device_income', {
+          p_device_id: device.id
+        });
 
-        if (userError) {
-          console.error(`Error fetching user ${device.user_id}:`, userError);
+        if (error) {
+          console.error(`Error processing device ${device.id}:`, error);
           errorCount++;
-          errors.push(`Device ${device.id}: Failed to fetch user balance`);
+          errors.push(`Device ${device.id}: ${error.message}`);
           continue;
         }
 
-        const currentBalance = parseFloat(userData.balance || '0');
-        const newBalance = currentBalance + incomeAmount;
-
-        // Update user balance
-        const { error: balanceError } = await supabase
-          .from('registered_users')
-          .update({ balance: newBalance })
-          .eq('user_id', device.user_id);
-
-        if (balanceError) {
-          console.error(`Error updating balance for user ${device.user_id}:`, balanceError);
-          errorCount++;
-          errors.push(`Device ${device.id}: Failed to update balance`);
-          continue;
+        if (result && result.success) {
+          console.log(`Successfully processed device ${device.id} for user ${device.user_id}: credited ${result.amount}`);
+          successCount++;
+        } else {
+          console.log(`Skipped device ${device.id}: ${result?.error || 'Unknown reason'}`);
         }
-
-        // Update device last_payout_at
-        const { error: deviceError } = await supabase
-          .from('user_devices')
-          .update({ last_payout_at: new Date().toISOString() })
-          .eq('id', device.id);
-
-        if (deviceError) {
-          console.error(`Error updating device ${device.id}:`, deviceError);
-          errorCount++;
-          errors.push(`Device ${device.id}: Failed to update payout time`);
-          continue;
-        }
-
-        // Create income record
-        const { error: incomeError } = await supabase
-          .from('income_records')
-          .insert({
-            user_id: device.user_id,
-            device_id: device.id,
-            device_name: device.device_name,
-            amount: incomeAmount,
-          });
-
-        if (incomeError) {
-          console.error(`Error creating income record for device ${device.id}:`, incomeError);
-          errorCount++;
-          errors.push(`Device ${device.id}: Failed to create income record`);
-          continue;
-        }
-
-        console.log(`Successfully processed device ${device.id} for user ${device.user_id}: credited ${incomeAmount}`);
-        successCount++;
       } catch (deviceError) {
         console.error(`Unexpected error processing device ${device.id}:`, deviceError);
         errorCount++;

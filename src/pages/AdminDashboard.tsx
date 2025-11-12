@@ -117,34 +117,24 @@ const AdminDashboard = () => {
 
   const handleUpdateBalance = async (userId: string, amountToAdd: number) => {
     try {
-      // Get current balance first
-      const { data: currentUser } = await supabase
-        .from('registered_users')
-        .select('balance')
-        .eq('user_id', userId)
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-      const currentBalance = Number(currentUser?.balance) || 0;
-      const newBalance = currentBalance + amountToAdd;
-
-      // Update balance
-      const { error } = await supabase
-        .from('registered_users')
-        .update({ balance: newBalance })
-        .eq('user_id', userId);
+      // Call secure database function with admin validation
+      const { data, error } = await supabase.rpc('admin_add_balance', {
+        p_admin_user_id: session.user.id,
+        p_target_user_id: userId,
+        p_amount: amountToAdd,
+        p_transaction_id: `ADMIN-${Date.now()}`,
+        p_e_wallet_number: 'N/A'
+      });
 
       if (error) throw error;
 
-      // Log recharge record
-      if (amountToAdd > 0) {
-        await supabase
-          .from('recharge_records')
-          .insert({
-            user_id: userId,
-            amount: amountToAdd,
-            previous_balance: currentBalance,
-            new_balance: newBalance
-          });
+      const result = data as any;
+      if (!result.success) {
+        toast.error(result.error || "Failed to update balance");
+        return;
       }
 
       toast.success(`Added GHS ${amountToAdd} to balance`);

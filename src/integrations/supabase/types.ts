@@ -114,7 +114,6 @@ export type Database = {
           id: string
           invitation_code: string | null
           last_checkin_at: string | null
-          password: string | null
           phone: string | null
           unique_code: string | null
           user_id: string | null
@@ -126,7 +125,6 @@ export type Database = {
           id?: string
           invitation_code?: string | null
           last_checkin_at?: string | null
-          password?: string | null
           phone?: string | null
           unique_code?: string | null
           user_id?: string | null
@@ -138,7 +136,6 @@ export type Database = {
           id?: string
           invitation_code?: string | null
           last_checkin_at?: string | null
-          password?: string | null
           phone?: string | null
           unique_code?: string | null
           user_id?: string | null
@@ -261,6 +258,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_add_balance: {
+        Args: {
+          p_admin_user_id: string
+          p_amount: number
+          p_e_wallet_number: string
+          p_target_user_id: string
+          p_transaction_id: string
+        }
+        Returns: Json
+      }
       check_rate_limit: {
         Args: {
           p_max_attempts: number
@@ -270,6 +277,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      credit_device_income: { Args: { p_device_id: string }; Returns: Json }
       generate_unique_code: { Args: never; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
@@ -281,6 +289,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      process_checkin: { Args: { p_user_id: string }; Returns: Json }
+      process_device_purchase: {
+        Args: {
+          p_daily_income: number
+          p_device_name: string
+          p_device_number: number
+          p_product_price: number
+          p_total_income: number
+          p_user_id: string
+          p_user_phone: string
+        }
+        Returns: Json
+      }
+      process_withdrawal: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
