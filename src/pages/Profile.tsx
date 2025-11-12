@@ -160,9 +160,9 @@ const Profile = () => {
             <span className="text-xs">Devices</span>
           </button>
 
-          {/* Center Action Button - Refresh */}
+          {/* Center Action Button - Customer Service */}
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => navigate("/customer-service")}
             className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg"
           >
             <Headphones className="w-6 h-6 text-white" />
