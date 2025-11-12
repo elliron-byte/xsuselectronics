@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import mtnLogo from "@/assets/mtn-logo.png";
 
 const PaymentConfirmation = () => {
   const location = useLocation();
@@ -162,13 +163,15 @@ const PaymentConfirmation = () => {
           {/* Repay To Section */}
           <div className="bg-white rounded-lg p-4 space-y-3">
             <p className="text-sm">
-              Please repay to <span className="text-orange-500">Vodafone (Telecel Play Ghana)</span> account:
+              Please repay to <span className="text-orange-500">MTN (MTN Ghana Limited)</span> account:
             </p>
             
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded">
-              <div className="bg-red-500 text-white w-10 h-10 rounded flex items-center justify-center font-bold text-xl">
-                t
-              </div>
+              <img 
+                src={mtnLogo} 
+                alt="MTN Logo" 
+                className="w-10 h-10 object-contain"
+              />
               <span className="text-xl font-bold flex-1">0266716101</span>
               <button 
                 onClick={() => handleCopy("0266716101")}
