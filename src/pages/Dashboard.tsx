@@ -198,7 +198,7 @@ const Dashboard = () => {
             <div className="text-sm opacity-90 mb-1">Total Income</div>
             <div className="text-2xl font-bold">Ghs 0</div>
           </div>
-          <button onClick={() => window.location.reload()} className="p-2 bg-white/20 rounded-full">
+          <button onClick={() => fetchUserData()} className="p-2 bg-white/20 rounded-full">
             <RotateCcw className="w-5 h-5" />
           </button>
         </div>
@@ -322,7 +322,7 @@ const Dashboard = () => {
 
           {/* Center Action Button */}
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => fetchUserData()}
             className="w-14 h-14 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg"
           >
             <RotateCcw className="w-7 h-7 text-white" />

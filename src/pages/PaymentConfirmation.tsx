@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import mtnLogo from "@/assets/mtn-logo.png";
+import telecelLogo from "@/assets/telecel-logo.png";
 
 const PaymentConfirmation = () => {
   const location = useLocation();
@@ -168,13 +168,13 @@ const PaymentConfirmation = () => {
             
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded">
               <img 
-                src={mtnLogo} 
-                alt="MTN Logo" 
+                src={telecelLogo} 
+                alt="Telecel Logo" 
                 className="w-10 h-10 object-contain"
               />
-              <span className="text-xl font-bold flex-1">0266716101</span>
+              <span className="text-xl font-bold flex-1">0207192366</span>
               <button 
-                onClick={() => handleCopy("0266716101")}
+                onClick={() => handleCopy("0207192366")}
                 className="text-primary text-sm"
               >
                 📋 Copy
