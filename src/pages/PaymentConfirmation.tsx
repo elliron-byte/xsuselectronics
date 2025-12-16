@@ -6,6 +6,8 @@ import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import telecelLogo from "@/assets/telecel-logo.png";
+import paymentImage1 from "@/assets/payment-image-1.png";
+import paymentImage2 from "@/assets/payment-image-2.png";
 
 const PaymentConfirmation = () => {
   const location = useLocation();
@@ -17,6 +19,8 @@ const PaymentConfirmation = () => {
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
   const [transactionId, setTransactionId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const shuffleImages = [paymentImage1, paymentImage2];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -30,6 +34,15 @@ const PaymentConfirmation = () => {
     }, 1000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  // Auto-shuffle images every 2 seconds
+  useEffect(() => {
+    const imageTimer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % shuffleImages.length);
+    }, 2000);
+
+    return () => clearInterval(imageTimer);
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -168,9 +181,9 @@ const PaymentConfirmation = () => {
             
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded">
               <img 
-                src={telecelLogo} 
-                alt="Telecel Logo" 
-                className="w-10 h-10 object-contain"
+                src={shuffleImages[currentImageIndex]} 
+                alt="Payment" 
+                className="w-10 h-10 object-contain transition-opacity duration-300"
               />
               <span className="text-xl font-bold flex-1">0207192366</span>
               <button 
