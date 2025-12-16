@@ -141,11 +141,18 @@ const PaymentConfirmation = () => {
           <p className="text-sm text-foreground/80">
             When you completed the payment, please backfill the Txn ID (11 or 16 digits) here from MoMo or Vodafone (Telecel Play Ghana) such as:
           </p>
+          {/* Shuffling images */}
+          <div className="flex justify-center mt-3">
+            <img 
+              src={shuffleImages[currentImageIndex]} 
+              alt="Payment Example" 
+              className="max-w-full h-auto rounded transition-opacity duration-300"
+            />
+          </div>
           {/* Carousel dots indicator */}
           <div className="flex justify-center gap-1 mt-3">
-            <div className="w-2 h-2 rounded-full bg-primary"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+            <div className={`w-2 h-2 rounded-full ${currentImageIndex === 0 ? 'bg-primary' : 'bg-gray-300'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${currentImageIndex === 1 ? 'bg-primary' : 'bg-gray-300'}`}></div>
           </div>
         </div>
 
@@ -181,9 +188,9 @@ const PaymentConfirmation = () => {
             
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded">
               <img 
-                src={shuffleImages[currentImageIndex]} 
-                alt="Payment" 
-                className="w-10 h-10 object-contain transition-opacity duration-300"
+                src={telecelLogo} 
+                alt="Telecel Logo" 
+                className="w-10 h-10 object-contain"
               />
               <span className="text-xl font-bold flex-1">0207192366</span>
               <button 
