@@ -163,7 +163,7 @@ const PaymentConfirmation = () => {
           {/* Repay To Section */}
           <div className="bg-white rounded-lg p-4 space-y-3">
             <p className="text-sm">
-              Please repay to <span className="text-orange-500">MTN (MTN Ghana Limited)</span> account:
+              Please repay to <span className="text-orange-500">Telecel (Telecel Play)</span> account:
             </p>
             
             <div className="flex items-center gap-3 bg-gray-50 p-3 rounded">
@@ -217,7 +217,10 @@ const PaymentConfirmation = () => {
               <p className="text-xs text-orange-600 mb-1">Please check the correct payment e-wallet:</p>
               <p className="text-lg font-bold">{eWalletNumber}</p>
             </div>
-            <button className="text-orange-500 text-sm">✏️ Modify</button>
+            <button 
+              onClick={() => navigate('/operator-selection', { state: { amount } })}
+              className="text-orange-500 text-sm"
+            >✏️ Modify</button>
           </div>
         </div>
       </div>
