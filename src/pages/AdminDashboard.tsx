@@ -187,9 +187,10 @@ const AdminDashboard = () => {
 
       if (error) throw error;
 
+      // Immediately update UI state
+      setUsers(prevUsers => prevUsers.filter(user => !selectedUsers.has(user.id)));
       toast.success(`Successfully deleted ${selectedUsers.size} user(s)`);
       setSelectedUsers(new Set());
-      fetchUsers();
       fetchStats();
       fetchUserDevices();
     } catch (error) {
