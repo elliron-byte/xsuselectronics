@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Search } from "lucide-react";
+import { Search, Check, X } from "lucide-react";
 
 interface RechargeRequest {
   id: string;
@@ -23,7 +23,6 @@ interface RechargeRequest {
 const UserRecharge = () => {
   const [rechargeRequests, setRechargeRequests] = useState<RechargeRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fundingAmounts, setFundingAmounts] = useState<{ [key: string]: string }>({});
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
@@ -51,7 +50,6 @@ const UserRecharge = () => {
       // Fetch user phone numbers and emails
       const requestsWithUserData = await Promise.all(
         (data || []).map(async (record) => {
-          // Get phone and email from registered_users
           const { data: userData } = await supabase
             .from('registered_users')
             .select('phone, email')
@@ -78,51 +76,16 @@ const UserRecharge = () => {
     }
   };
 
-  const handleStatusChange = async (recordId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('recharge_records')
-        .update({ status: newStatus })
-        .eq('id', recordId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Status updated to ${newStatus}`,
-      });
-
-      fetchRechargeRequests();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleFundAccount = async (record: RechargeRequest) => {
-    const fundAmount = parseFloat(fundingAmounts[record.id] || "0");
-    
-    if (fundAmount <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount to fund",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handleApprove = async (record: RechargeRequest) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Call secure database function with admin validation
+      // Call secure database function to fund the account with the requested amount
       const { data, error } = await supabase.rpc('admin_add_balance', {
         p_admin_user_id: session.user.id,
         p_target_user_id: record.user_id,
-        p_amount: fundAmount,
+        p_amount: record.amount,
         p_transaction_id: record.transaction_id,
         p_e_wallet_number: record.e_wallet_number
       });
@@ -141,10 +104,33 @@ const UserRecharge = () => {
 
       toast({
         title: "Success",
-        description: `Account funded with GHS ${fundAmount}`,
+        description: `Account funded with GHS ${record.amount}`,
       });
 
-      setFundingAmounts({ ...fundingAmounts, [record.id]: "" });
+      fetchRechargeRequests();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDecline = async (recordId: string) => {
+    try {
+      const { error } = await supabase
+        .from('recharge_records')
+        .update({ status: 'failed' })
+        .eq('id', recordId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Declined",
+        description: "Recharge request has been declined",
+      });
+
       fetchRechargeRequests();
     } catch (error: any) {
       toast({
@@ -195,7 +181,6 @@ const UserRecharge = () => {
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Fund Amount</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -218,39 +203,27 @@ const UserRecharge = () => {
                 </TableCell>
                 <TableCell>{format(new Date(request.created_at), 'MMM dd, yyyy HH:mm')}</TableCell>
                 <TableCell>
-                  <Input
-                    type="number"
-                    placeholder="Amount"
-                    value={fundingAmounts[request.id] || ""}
-                    onChange={(e) => setFundingAmounts({
-                      ...fundingAmounts,
-                      [request.id]: e.target.value
-                    })}
-                    className="w-24"
-                    disabled={request.status === 'successful'}
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    {request.status === 'pending' && (
-                      <>
-                        <Button
-                          onClick={() => handleFundAccount(request)}
-                          size="sm"
-                          variant="default"
-                        >
-                          Fund
-                        </Button>
-                        <Button
-                          onClick={() => handleStatusChange(request.id, 'successful')}
-                          size="sm"
-                          variant="outline"
-                        >
-                          Approve
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                  {request.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleApprove(request)}
+                        size="sm"
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleDecline(request.id)}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Decline
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
