@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Diamond, Wallet, Database, Shield, Home as HomeIcon, ShoppingCart, Users, User, Headphones } from "lucide-react";
+import { ChevronRight, Diamond, Wallet, Database, Shield, Home as HomeIcon, ShoppingCart, Users, User, Headphones, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -65,7 +65,17 @@ const Profile = () => {
     { icon: Database, label: "Recharge Record", color: "text-primary", path: "/recharge-record" },
     { icon: Database, label: "Withdraw Record", color: "text-primary", path: "/withdraw-record" },
     { icon: Shield, label: "Bonus Code", color: "text-primary", path: "/bonus-code" },
+    { icon: LogOut, label: "Safe Exit", color: "text-destructive", path: "/logout" },
   ];
+
+  const handleMenuClick = async (path: string) => {
+    if (path === "/logout") {
+      await supabase.auth.signOut();
+      navigate('/login');
+    } else {
+      navigate(path);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -127,12 +137,12 @@ const Profile = () => {
             return (
               <button
                 key={index}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleMenuClick(item.path)}
                 className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
               >
                 <div className="flex items-center gap-3">
                   <Icon className={`w-5 h-5 ${item.color}`} />
-                  <span className="font-medium text-primary">{item.label}</span>
+                  <span className={`font-medium ${item.color === 'text-destructive' ? 'text-destructive' : 'text-primary'}`}>{item.label}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
