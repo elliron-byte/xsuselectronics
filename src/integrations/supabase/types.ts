@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      bonus_code_redemptions: {
+        Row: {
+          amount: number
+          code_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonus_code_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "bonus_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bonus_codes: {
+        Row: {
+          amount: number
+          code: string
+          created_at: string
+          current_uses: number
+          id: string
+          max_uses: number
+        }
+        Insert: {
+          amount: number
+          code: string
+          created_at?: string
+          current_uses?: number
+          id?: string
+          max_uses?: number
+        }
+        Update: {
+          amount?: number
+          code?: string
+          created_at?: string
+          current_uses?: number
+          id?: string
+          max_uses?: number
+        }
+        Relationships: []
+      }
       income_records: {
         Row: {
           amount: number
@@ -305,6 +364,10 @@ export type Database = {
       }
       process_withdrawal: {
         Args: { p_amount: number; p_user_id: string }
+        Returns: Json
+      }
+      redeem_bonus_code: {
+        Args: { p_code: string; p_user_id: string }
         Returns: Json
       }
     }

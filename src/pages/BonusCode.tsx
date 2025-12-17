@@ -1,16 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const BonusCode = () => {
   const navigate = useNavigate();
   const [bonusCode, setBonusCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+      setUserId(session.user.id);
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleSubmit = async () => {
     if (!bonusCode.trim()) {
       toast({
         title: "Error",
@@ -20,12 +35,49 @@ const BonusCode = () => {
       return;
     }
 
-    // TODO: Implement bonus code validation and redemption
-    toast({
-      title: "Success",
-      description: "Bonus code submitted successfully!",
-    });
-    setBonusCode("");
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "Please log in to redeem bonus codes",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('redeem_bonus_code', {
+        p_user_id: userId,
+        p_code: bonusCode.trim()
+      });
+
+      if (error) throw error;
+
+      const result = data as { success: boolean; error?: string; amount?: number };
+
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to redeem bonus code",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: `GHS ${result.amount} has been added to your account!`,
+      });
+      setBonusCode("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to redeem bonus code",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,9 +110,10 @@ const BonusCode = () => {
             </div>
             <Button 
               onClick={handleSubmit}
+              disabled={isLoading}
               className="w-full bg-primary hover:bg-primary/90"
             >
-              Submit Bonus Code
+              {isLoading ? "Redeeming..." : "Submit Bonus Code"}
             </Button>
           </CardContent>
         </Card>
