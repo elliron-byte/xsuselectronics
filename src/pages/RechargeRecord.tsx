@@ -58,6 +58,11 @@ const RechargeRecord = () => {
             <Card key={record.id} className="border-primary/20">
               <CardContent className="p-4">
                 <div className="space-y-2">
+                  {record.e_wallet_number === 'Admin Funded' && (
+                    <div className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded text-center mb-2">
+                      Funded by Admin
+                    </div>
+                  )}
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Amount</span>
                     <span className="text-lg font-bold text-primary">GHS {Number(record.amount).toFixed(2)}</span>
@@ -72,7 +77,7 @@ const RechargeRecord = () => {
                       {record.status || 'pending'}
                     </span>
                   </div>
-                  {record.transaction_id && (
+                  {record.transaction_id && record.e_wallet_number !== 'Admin Funded' && (
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Transaction ID</span>
                       <span className="text-xs font-mono">{record.transaction_id}</span>
