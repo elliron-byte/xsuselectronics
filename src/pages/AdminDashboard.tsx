@@ -123,8 +123,8 @@ const AdminDashboard = () => {
         p_admin_user_id: session.user.id,
         p_target_user_id: userId,
         p_amount: amountToAdd,
-        p_transaction_id: `ADMIN-${Date.now()}`,
-        p_e_wallet_number: 'N/A'
+        p_transaction_id: `ADMIN-FUNDED-${Date.now()}`,
+        p_e_wallet_number: 'Admin Funded'
       });
 
       if (error) throw error;
@@ -201,7 +201,8 @@ const AdminDashboard = () => {
 
   const filteredUsers = users.filter(user => 
     user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.unique_code?.toLowerCase().includes(searchTerm.toLowerCase())
+    user.unique_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const allSelected = filteredUsers.length > 0 && filteredUsers.every(user => selectedUsers.has(user.id));
@@ -360,17 +361,17 @@ const AdminDashboard = () => {
                           />
                         </TableHead>
                         <TableHead>Unique Code</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Phone</TableHead>
                         <TableHead>Current Balance</TableHead>
                         <TableHead>Add Amount</TableHead>
-                        <TableHead>Invitation Code</TableHead>
                         <TableHead>Created At</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredUsers.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center text-muted-foreground">
+                          <TableCell colSpan={8} className="text-center text-muted-foreground">
                             No users found
                           </TableCell>
                         </TableRow>
@@ -384,6 +385,7 @@ const AdminDashboard = () => {
                               />
                             </TableCell>
                             <TableCell className="font-medium">{user.unique_code || 'N/A'}</TableCell>
+                            <TableCell className="text-sm">{user.email || 'N/A'}</TableCell>
                             <TableCell>{user.phone || 'N/A'}</TableCell>
                             <TableCell className="font-semibold">
                               GHS {Number(user.balance || 0).toFixed(2)}
@@ -406,7 +408,6 @@ const AdminDashboard = () => {
                                 />
                               </div>
                             </TableCell>
-                            <TableCell>{user.invitation_code || 'N/A'}</TableCell>
                             <TableCell>
                               {new Date(user.created_at).toLocaleDateString()}
                             </TableCell>
