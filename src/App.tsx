@@ -21,6 +21,8 @@ import Recharge from "./pages/Recharge";
 import OperatorSelection from "./pages/OperatorSelection";
 import PaymentConfirmation from "./pages/PaymentConfirmation";
 import About from "./pages/About";
+import AboutCompany from "./pages/AboutCompany";
+import AdminAboutContent from "./pages/AdminAboutContent";
 import CustomerService from "./pages/CustomerService";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +43,7 @@ const App = () => (
           <Route path="/devices" element={<Devices />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/referrals/:uniqueCode" element={<UserReferrals />} />
+          <Route path="/admin/about-content" element={<AdminAboutContent />} />
           <Route path="/income-record" element={<IncomeRecord />} />
           <Route path="/recharge-record" element={<RechargeRecord />} />
           <Route path="/withdraw-record" element={<WithdrawRecord />} />
@@ -51,6 +54,7 @@ const App = () => (
           <Route path="/operator-selection" element={<OperatorSelection />} />
           <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
           <Route path="/about" element={<About />} />
+          <Route path="/about-company" element={<AboutCompany />} />
           <Route path="/customer-service" element={<CustomerService />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
