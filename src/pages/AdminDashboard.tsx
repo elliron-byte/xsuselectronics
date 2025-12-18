@@ -377,8 +377,12 @@ const AdminDashboard = () => {
                         </TableRow>
                       ) : (
                         filteredUsers.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell>
+                          <TableRow 
+                            key={user.id}
+                            className="cursor-pointer hover:bg-accent"
+                            onClick={() => navigate(`/admin/referrals/${user.unique_code}`)}
+                          >
+                            <TableCell onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={selectedUsers.has(user.id)}
                                 onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
@@ -390,7 +394,7 @@ const AdminDashboard = () => {
                             <TableCell className="font-semibold">
                               GHS {Number(user.balance || 0).toFixed(2)}
                             </TableCell>
-                            <TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
                               <div className="flex items-center gap-2">
                                 <Input
                                   type="number"

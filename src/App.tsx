@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Team from "./pages/Team";
 import Devices from "./pages/Devices";
 import AdminDashboard from "./pages/AdminDashboard";
+import UserReferrals from "./pages/UserReferrals";
 import IncomeRecord from "./pages/IncomeRecord";
 import RechargeRecord from "./pages/RechargeRecord";
 import WithdrawRecord from "./pages/WithdrawRecord";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/team" element={<Team />} />
           <Route path="/devices" element={<Devices />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/referrals/:uniqueCode" element={<UserReferrals />} />
           <Route path="/income-record" element={<IncomeRecord />} />
           <Route path="/recharge-record" element={<RechargeRecord />} />
           <Route path="/withdraw-record" element={<WithdrawRecord />} />
