@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,6 +15,7 @@ const generateCaptcha = () => {
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [captchaCode, setCaptchaCode] = useState(generateCaptcha());
@@ -23,7 +24,7 @@ const RegistrationForm = () => {
     email: "",
     captcha: "",
     password: "",
-    invitationCode: "",
+    invitationCode: searchParams.get("ref") || "",
   });
 
   useEffect(() => {
