@@ -6,8 +6,16 @@ import telegramIcon from "@/assets/telegram-icon.png";
 const CustomerService = () => {
   const navigate = useNavigate();
 
-  const handleTelegram = () => {
+  const handleCustomerService = () => {
     window.open('https://t.me/Xsus_Electronics', '_blank');
+  };
+
+  const handleTelegramGroup = () => {
+    window.open('https://t.me/+-zStGUeOsKg4Mjlk', '_blank');
+  };
+
+  const handleTelegramChannel = () => {
+    window.open('https://t.me/+HAyr0bY62_NjOTM0', '_blank');
   };
 
   return (
@@ -46,16 +54,44 @@ const CustomerService = () => {
           </div>
         </div>
 
-        {/* Telegram Button */}
+        {/* Customer Service Button */}
         <button
-          onClick={handleTelegram}
+          onClick={handleCustomerService}
           className="w-full bg-white rounded-2xl p-4 shadow-sm border border-border flex items-center justify-between hover:bg-accent transition-colors"
         >
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
-              <img src={telegramIcon} alt="Telegram" className="w-full h-full object-cover" />
+              <img src={telegramIcon} alt="Customer Service" className="w-full h-full object-cover" />
             </div>
-            <span className="text-base font-medium">Telegram</span>
+            <span className="text-base font-medium">Customer Service</span>
+          </div>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180" />
+        </button>
+
+        {/* Telegram Group Button */}
+        <button
+          onClick={handleTelegramGroup}
+          className="w-full bg-white rounded-2xl p-4 shadow-sm border border-border flex items-center justify-between hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
+              <img src={telegramIcon} alt="Telegram Group" className="w-full h-full object-cover" />
+            </div>
+            <span className="text-base font-medium">Telegram Group</span>
+          </div>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180" />
+        </button>
+
+        {/* Telegram Channel Button */}
+        <button
+          onClick={handleTelegramChannel}
+          className="w-full bg-white rounded-2xl p-4 shadow-sm border border-border flex items-center justify-between hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
+              <img src={telegramIcon} alt="Telegram Channel" className="w-full h-full object-cover" />
+            </div>
+            <span className="text-base font-medium">Telegram Channel</span>
           </div>
           <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180" />
         </button>
