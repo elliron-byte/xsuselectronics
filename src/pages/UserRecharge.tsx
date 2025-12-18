@@ -28,10 +28,19 @@ const UserRecharge = () => {
 
   useEffect(() => {
     fetchRechargeRequests();
+    
+    // Auto-refresh every 10 seconds
+    const intervalId = setInterval(() => {
+      fetchRechargeRequests(true); // silent refresh
+    }, 10000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
-  const fetchRechargeRequests = async () => {
+  const fetchRechargeRequests = async (silent = false) => {
     try {
+      if (!silent) setLoading(true);
+      
       const { data, error } = await supabase
         .from('recharge_records')
         .select(`
@@ -54,7 +63,7 @@ const UserRecharge = () => {
             .from('registered_users')
             .select('phone, email')
             .eq('user_id', record.user_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...record,
@@ -66,13 +75,15 @@ const UserRecharge = () => {
 
       setRechargeRequests(requestsWithUserData);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (!silent) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -81,26 +92,36 @@ const UserRecharge = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Call secure database function to fund the account with the requested amount
-      const { data, error } = await supabase.rpc('admin_add_balance', {
-        p_admin_user_id: session.user.id,
-        p_target_user_id: record.user_id,
-        p_amount: record.amount,
-        p_transaction_id: record.transaction_id,
-        p_e_wallet_number: record.e_wallet_number
-      });
+      // Get user's current balance
+      const { data: userData, error: userError } = await supabase
+        .from('registered_users')
+        .select('balance')
+        .eq('user_id', record.user_id)
+        .single();
 
-      if (error) throw error;
+      if (userError) throw userError;
 
-      const result = data as any;
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: result.error,
-          variant: "destructive"
-        });
-        return;
-      }
+      const currentBalance = userData?.balance || 0;
+      const newBalance = currentBalance + record.amount;
+
+      // Update user's balance
+      const { error: balanceError } = await supabase
+        .from('registered_users')
+        .update({ balance: newBalance })
+        .eq('user_id', record.user_id);
+
+      if (balanceError) throw balanceError;
+
+      // Update the existing recharge record status to successful
+      const { error: updateError } = await supabase
+        .from('recharge_records')
+        .update({ 
+          status: 'successful',
+          new_balance: newBalance
+        })
+        .eq('id', record.id);
+
+      if (updateError) throw updateError;
 
       toast({
         title: "Success",
@@ -166,7 +187,7 @@ const UserRecharge = () => {
               className="pl-10 w-80"
             />
           </div>
-          <Button onClick={fetchRechargeRequests}>Refresh</Button>
+          <Button onClick={() => fetchRechargeRequests()}>Refresh</Button>
         </div>
       </div>
 
