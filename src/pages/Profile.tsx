@@ -60,7 +60,7 @@ const Profile = () => {
   }, [navigate]);
 
   const menuItems = [
-    { icon: Diamond, label: "About Company", color: "text-primary", path: "/about" },
+    { icon: Diamond, label: "About Company", color: "text-primary", path: "/about-company" },
     { icon: Wallet, label: "Income Record", color: "text-primary", path: "/income-record" },
     { icon: Database, label: "Recharge Record", color: "text-primary", path: "/recharge-record" },
     { icon: Database, label: "Withdraw Record", color: "text-primary", path: "/withdraw-record" },

@@ -232,6 +232,7 @@ const AdminDashboard = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="recharge">User Recharge</TabsTrigger>
+          <TabsTrigger value="about" onClick={() => navigate('/admin/about-content')}>About Company</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
