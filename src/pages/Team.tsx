@@ -92,7 +92,7 @@ const Team = () => {
             Invest together, get rich together
           </p>
           
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-4">
             <div className="flex-1">
               <div className="text-2xl font-bold text-foreground">GHS 0</div>
               <div className="text-sm text-muted-foreground">Commission</div>
@@ -110,6 +110,25 @@ const Team = () => {
             >
               <Copy className="w-5 h-5 text-white" />
             </button>
+          </div>
+
+          {/* Invite Link */}
+          <div className="bg-white rounded-xl p-3 mb-6 border border-yellow-200">
+            <div className="text-sm text-muted-foreground mb-1">Invite Link</div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 text-sm font-medium text-foreground truncate">
+                {`https://xsuselectronics.vercel.app/?ref=${userData?.uniqueCode || '00000'}`}
+              </div>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://xsuselectronics.vercel.app/?ref=${userData?.uniqueCode || ''}`);
+                  toast.success("Invite link copied!");
+                }}
+                className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0"
+              >
+                <Copy className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
 
           {/* Team Level Section */}
