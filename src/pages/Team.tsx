@@ -7,7 +7,12 @@ import { toast } from "sonner";
 
 const Team = () => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState<{ uniqueCode: string; lv1Members: number } | null>(null);
+  const [userData, setUserData] = useState<{ 
+    uniqueCode: string; 
+    lv1Members: number;
+    lv1Recharge: number;
+    totalCommission: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -24,14 +29,27 @@ const Team = () => {
         .single();
 
       if (data) {
+        // Get LV1 member count
         const { count } = await supabase
           .from('registered_users')
           .select('*', { count: 'exact', head: true })
           .eq('invitation_code', data.unique_code);
 
+        // Get total commission and recharge from commission_records
+        const { data: commissionData } = await supabase
+          .from('commission_records')
+          .select('device_purchase_amount, commission_amount')
+          .eq('referrer_id', session.user.id)
+          .eq('commission_level', 1);
+
+        const totalRecharge = commissionData?.reduce((sum, record) => sum + Number(record.device_purchase_amount), 0) || 0;
+        const totalCommission = commissionData?.reduce((sum, record) => sum + Number(record.commission_amount), 0) || 0;
+
         setUserData({ 
           uniqueCode: data.unique_code || '00000',
-          lv1Members: count || 0
+          lv1Members: count || 0,
+          lv1Recharge: totalRecharge,
+          totalCommission: totalCommission
         });
       }
     };
@@ -48,7 +66,7 @@ const Team = () => {
   }, [navigate]);
 
   const teamLevels = [
-    { level: "LV1", rebate: "5%", recharge: "GHS 0", members: userData?.lv1Members.toString() || "0", color: "bg-yellow-500" },
+    { level: "LV1", rebate: "5%", recharge: `GHS ${userData?.lv1Recharge?.toFixed(2) || '0'}`, members: userData?.lv1Members.toString() || "0", color: "bg-yellow-500" },
     { level: "LV2", rebate: "7%", recharge: "GHS 0", members: "0", color: "bg-gray-400" },
     { level: "LV3", rebate: "11%", recharge: "GHS 0", members: "0", color: "bg-orange-400" },
   ];
@@ -94,7 +112,7 @@ const Team = () => {
           
           <div className="flex items-center gap-4 mb-4">
             <div className="flex-1">
-              <div className="text-2xl font-bold text-foreground">GHS 0</div>
+              <div className="text-2xl font-bold text-foreground">GHS {userData?.totalCommission?.toFixed(2) || '0'}</div>
               <div className="text-sm text-muted-foreground">Commission</div>
             </div>
             <div className="flex-1">
