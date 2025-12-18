@@ -48,7 +48,7 @@ const Team = () => {
   }, [navigate]);
 
   const teamLevels = [
-    { level: "LV1", rebate: "30%", recharge: "GHS 0", members: userData?.lv1Members.toString() || "0", color: "bg-yellow-500" },
+    { level: "LV1", rebate: "5%", recharge: "GHS 0", members: userData?.lv1Members.toString() || "0", color: "bg-yellow-500" },
     { level: "LV2", rebate: "5%", recharge: "GHS 0", members: "0", color: "bg-gray-400" },
     { level: "LV3", rebate: "3%", recharge: "GHS 0", members: "0", color: "bg-orange-400" },
   ];
