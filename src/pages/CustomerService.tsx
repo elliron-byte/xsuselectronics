@@ -6,11 +6,11 @@ const CustomerService = () => {
   const navigate = useNavigate();
 
   const handleTelegramChannel = () => {
-    window.open('https://t.me/+mP4vPu1xRT41YjA0', '_blank');
+    window.open('https://t.me/+HAyr0bY62_NjOTM0', '_blank');
   };
 
   const handleTelegramGroup = () => {
-    window.open('https://t.me/+SAm5glQ9ez1iNjE0', '_blank');
+    window.open('https://t.me/+-zStGUeOsKg4Mjlk', '_blank');
   };
 
   return (
