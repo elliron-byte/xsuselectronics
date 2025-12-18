@@ -94,6 +94,36 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_records: {
+        Row: {
+          commission_amount: number
+          commission_level: number
+          created_at: string
+          device_purchase_amount: number
+          id: string
+          referred_user_id: string
+          referrer_id: string
+        }
+        Insert: {
+          commission_amount: number
+          commission_level?: number
+          created_at?: string
+          device_purchase_amount: number
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+        }
+        Update: {
+          commission_amount?: number
+          commission_level?: number
+          created_at?: string
+          device_purchase_amount?: number
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       income_records: {
         Row: {
           amount: number
