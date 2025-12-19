@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BlockedUserProvider } from "@/hooks/useBlockedUser";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -28,6 +29,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Wrapper for protected user routes that checks blocked status
+const ProtectedUserRoute = ({ children }: { children: React.ReactNode }) => (
+  <BlockedUserProvider>{children}</BlockedUserProvider>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -37,25 +43,25 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/devices" element={<Devices />} />
+          <Route path="/dashboard" element={<ProtectedUserRoute><Dashboard /></ProtectedUserRoute>} />
+          <Route path="/profile" element={<ProtectedUserRoute><Profile /></ProtectedUserRoute>} />
+          <Route path="/team" element={<ProtectedUserRoute><Team /></ProtectedUserRoute>} />
+          <Route path="/devices" element={<ProtectedUserRoute><Devices /></ProtectedUserRoute>} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/referrals/:uniqueCode" element={<UserReferrals />} />
           <Route path="/admin/about-content" element={<AdminAboutContent />} />
-          <Route path="/income-record" element={<IncomeRecord />} />
-          <Route path="/recharge-record" element={<RechargeRecord />} />
-          <Route path="/withdraw-record" element={<WithdrawRecord />} />
-          <Route path="/bonus-code" element={<BonusCode />} />
-          <Route path="/withdrawal" element={<Withdrawal />} />
-          <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
-          <Route path="/recharge" element={<Recharge />} />
-          <Route path="/operator-selection" element={<OperatorSelection />} />
-          <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/about-company" element={<AboutCompany />} />
-          <Route path="/customer-service" element={<CustomerService />} />
+          <Route path="/income-record" element={<ProtectedUserRoute><IncomeRecord /></ProtectedUserRoute>} />
+          <Route path="/recharge-record" element={<ProtectedUserRoute><RechargeRecord /></ProtectedUserRoute>} />
+          <Route path="/withdraw-record" element={<ProtectedUserRoute><WithdrawRecord /></ProtectedUserRoute>} />
+          <Route path="/bonus-code" element={<ProtectedUserRoute><BonusCode /></ProtectedUserRoute>} />
+          <Route path="/withdrawal" element={<ProtectedUserRoute><Withdrawal /></ProtectedUserRoute>} />
+          <Route path="/withdrawal-accounts" element={<ProtectedUserRoute><WithdrawalAccounts /></ProtectedUserRoute>} />
+          <Route path="/recharge" element={<ProtectedUserRoute><Recharge /></ProtectedUserRoute>} />
+          <Route path="/operator-selection" element={<ProtectedUserRoute><OperatorSelection /></ProtectedUserRoute>} />
+          <Route path="/payment-confirmation" element={<ProtectedUserRoute><PaymentConfirmation /></ProtectedUserRoute>} />
+          <Route path="/about" element={<ProtectedUserRoute><About /></ProtectedUserRoute>} />
+          <Route path="/about-company" element={<ProtectedUserRoute><AboutCompany /></ProtectedUserRoute>} />
+          <Route path="/customer-service" element={<ProtectedUserRoute><CustomerService /></ProtectedUserRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

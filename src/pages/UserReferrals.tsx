@@ -3,18 +3,21 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, Users, Check, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ChevronLeft, Users, Check, X, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ReferredUser {
   id: string;
+  user_id: string | null;
   phone: string | null;
   email: string | null;
   unique_code: string | null;
   balance: number | null;
   created_at: string;
   hasDevice: boolean;
+  is_blocked: boolean;
 }
 
 const UserReferrals = () => {
@@ -83,7 +86,8 @@ const UserReferrals = () => {
 
           return {
             ...user,
-            hasDevice: (count || 0) > 0
+            hasDevice: (count || 0) > 0,
+            is_blocked: user.is_blocked || false
           };
         })
       );
@@ -94,6 +98,30 @@ const UserReferrals = () => {
       toast.error("Failed to load referral data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleBlock = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('registered_users')
+        .update({ is_blocked: !currentStatus })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      setReferredUsers(prev => 
+        prev.map(user => 
+          user.user_id === userId 
+            ? { ...user, is_blocked: !currentStatus }
+            : user
+        )
+      );
+
+      toast.success(`User ${!currentStatus ? 'blocked' : 'unblocked'} successfully`);
+    } catch (error) {
+      console.error('Error toggling block status:', error);
+      toast.error("Failed to update user status");
     }
   };
 
@@ -195,6 +223,12 @@ const UserReferrals = () => {
                       <TableHead>Balance</TableHead>
                       <TableHead>Owns Device</TableHead>
                       <TableHead>Joined</TableHead>
+                      <TableHead className="text-center">
+                        <div className="flex items-center gap-1 justify-center">
+                          <Ban className="w-4 h-4" />
+                          Block
+                        </div>
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -219,6 +253,13 @@ const UserReferrals = () => {
                         </TableCell>
                         <TableCell>
                           {new Date(user.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Switch
+                            checked={user.is_blocked}
+                            onCheckedChange={() => user.user_id && handleToggleBlock(user.user_id, user.is_blocked)}
+                            className="data-[state=checked]:bg-destructive"
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
