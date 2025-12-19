@@ -361,6 +361,9 @@ const Dashboard = () => {
               <p className="text-sm text-amber-700">
                 Your account balance must be at least <span className="font-bold">70 GHS</span> to purchase this Special Device.
               </p>
+              <p className="text-sm text-amber-700 mt-2">
+                <span className="font-medium">Note:</span> After you purchase this device, only <span className="font-bold">50 GHS</span> will be deducted from your account.
+              </p>
             </div>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>Product Price: <span className="font-semibold text-foreground">50 GHS</span></p>
