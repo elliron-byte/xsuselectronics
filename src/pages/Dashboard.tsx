@@ -1,17 +1,25 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Wallet, ArrowDownToLine, Users, Calendar, Send, RotateCcw, Home as HomeIcon, Menu, User, ShoppingCart } from "lucide-react";
+import { Wallet, ArrowDownToLine, Users, Calendar, Send, RotateCcw, Home as HomeIcon, Menu, User, ShoppingCart, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const REGISTRATION_BONUS = 20;
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState<"home" | "devices" | "team" | "profile">("home");
   const [userData, setUserData] = useState<{ phone: string; uniqueCode: string; balance: number } | null>(null);
-
   const [session, setSession] = useState<any>(null);
+  const [showSpecialInfo, setShowSpecialInfo] = useState(false);
 
   const fetchUserData = async () => {
     const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -65,6 +73,17 @@ const Dashboard = () => {
     };
   }, [navigate]);
 
+  const specialDevice = {
+    id: 0,
+    name: "Special Device",
+    price: 50,
+    priceDisplay: "50 Ghs",
+    revenue: "10 Days",
+    dailyEarnings: "10 Ghs",
+    totalGain: "100 Ghs",
+    isSpecial: true,
+  };
+
   const investments = [
     {
       id: 1,
@@ -74,6 +93,7 @@ const Dashboard = () => {
       revenue: "30 Days",
       dailyEarnings: "9 Ghs",
       totalGain: "270 Ghs",
+      isSpecial: false,
     },
     {
       id: 2,
@@ -83,6 +103,7 @@ const Dashboard = () => {
       revenue: "30 Days",
       dailyEarnings: "20 Ghs",
       totalGain: "600 Ghs",
+      isSpecial: false,
     },
     {
       id: 3,
@@ -92,6 +113,7 @@ const Dashboard = () => {
       revenue: "30 Days",
       dailyEarnings: "27 Ghs",
       totalGain: "810 Ghs",
+      isSpecial: false,
     },
     {
       id: 4,
@@ -101,6 +123,7 @@ const Dashboard = () => {
       revenue: "30 Days",
       dailyEarnings: "40 Ghs",
       totalGain: "1200 Ghs",
+      isSpecial: false,
     },
     {
       id: 5,
@@ -110,6 +133,7 @@ const Dashboard = () => {
       revenue: "30 Days",
       dailyEarnings: "60 Ghs",
       totalGain: "1800 Ghs",
+      isSpecial: false,
     },
   ];
 
@@ -121,6 +145,22 @@ const Dashboard = () => {
         variant: "destructive"
       });
       return;
+    }
+
+    // Special device validation - cannot use registration bonus
+    if (investment.isSpecial) {
+      const currentBalance = userData?.balance || 0;
+      // User needs to have recharged at least 50 GHS (balance must be > registration bonus + price without using bonus)
+      const rechargedAmount = currentBalance - REGISTRATION_BONUS;
+      
+      if (rechargedAmount < investment.price) {
+        toast({
+          title: "Insufficient Balance",
+          description: "You cannot purchase this Special Device with your registration bonus. Please recharge at least 50 GHS to purchase this device.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     try {
@@ -170,6 +210,8 @@ const Dashboard = () => {
       });
     }
   };
+
+  const allInvestments = [specialDevice, ...investments];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -245,15 +287,20 @@ const Dashboard = () => {
 
       {/* Investment Cards */}
       <div className="flex-1 px-4 pb-20 space-y-4 overflow-y-auto">
-        {investments.map((investment) => (
-          <div key={investment.id} className="bg-white rounded-2xl p-4 shadow-sm border border-border">
+        {allInvestments.map((investment) => (
+          <div key={investment.id} className={`bg-white rounded-2xl p-4 shadow-sm border ${investment.isSpecial ? 'border-amber-400 border-2' : 'border-border'}`}>
+            {investment.isSpecial && (
+              <div className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-full inline-block mb-2">
+                ⭐ SPECIAL OFFER
+              </div>
+            )}
             <div className="flex gap-4">
               {/* Logo */}
               <div className="w-16 h-16 flex-shrink-0">
-                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className={`w-16 h-16 rounded-xl ${investment.isSpecial ? 'bg-amber-100' : 'bg-primary/10'} flex items-center justify-center`}>
                   <div className="flex items-center gap-1">
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">X</span>
+                    <div className={`w-6 h-6 rounded-full ${investment.isSpecial ? 'bg-amber-500' : 'bg-primary'} flex items-center justify-center`}>
+                      <span className="text-white text-sm font-bold">{investment.isSpecial ? '★' : 'X'}</span>
                     </div>
                   </div>
                 </div>
@@ -283,16 +330,58 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Invest Button */}
-            <Button 
-              onClick={() => handleInvest(investment)}
-              className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-11 rounded-xl"
-            >
-              Invest Now
-            </Button>
+            {/* Invest/More Info Button */}
+            {investment.isSpecial ? (
+              <Button 
+                onClick={() => setShowSpecialInfo(true)}
+                className="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-white h-11 rounded-xl"
+              >
+                <Info className="w-4 h-4 mr-2" />
+                More Info
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => handleInvest(investment)}
+                className="w-full mt-4 bg-primary hover:bg-primary/90 text-white h-11 rounded-xl"
+              >
+                Invest Now
+              </Button>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Special Device Info Dialog */}
+      <Dialog open={showSpecialInfo} onOpenChange={setShowSpecialInfo}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center">Special Device Info</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-center">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-amber-800 font-medium mb-2">⚠️ Important Notice</p>
+              <p className="text-sm text-amber-700">
+                You cannot purchase this Special Device with your registration bonus. 
+                You must recharge at least <span className="font-bold">50 GHS</span> to purchase this device.
+              </p>
+            </div>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>Product Price: <span className="font-semibold text-foreground">50 GHS</span></p>
+              <p>Daily Earnings: <span className="font-semibold text-foreground">10 GHS</span></p>
+              <p>Total Gain: <span className="font-semibold text-foreground">100 GHS</span></p>
+            </div>
+            <Button 
+              onClick={() => {
+                setShowSpecialInfo(false);
+                handleInvest(specialDevice);
+              }}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              Purchase Now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border">
