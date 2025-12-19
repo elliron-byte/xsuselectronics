@@ -62,15 +62,7 @@ export const BlockedUserProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <BlockedUserContext.Provider value={{ isBlocked, loading }}>
-      {isBlocked && !loading && (
-        <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center pointer-events-auto">
-          <div className="bg-background p-6 rounded-lg text-center max-w-sm mx-4">
-            <h2 className="text-xl font-bold text-destructive mb-2">Account Suspended</h2>
-            <p className="text-muted-foreground">Your account has been temporarily suspended. Please contact support for assistance.</p>
-          </div>
-        </div>
-      )}
-      <div className={isBlocked ? 'pointer-events-none' : ''}>
+      <div className={isBlocked && !loading ? 'pointer-events-none select-none' : ''}>
         {children}
       </div>
     </BlockedUserContext.Provider>
