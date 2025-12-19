@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Search, Shield, Users, Wallet, Trash2 } from "lucide-react";
+import { LogOut, Search, Shield, Users, Wallet, Trash2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import UserRecharge from "./UserRecharge";
@@ -199,6 +200,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleToggleBlock = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('registered_users')
+        .update({ is_blocked: !currentStatus })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      setUsers(prev => 
+        prev.map(user => 
+          user.user_id === userId 
+            ? { ...user, is_blocked: !currentStatus }
+            : user
+        )
+      );
+
+      toast.success(`User ${!currentStatus ? 'blocked' : 'unblocked'} successfully`);
+    } catch (error) {
+      console.error('Error toggling block status:', error);
+      toast.error("Failed to update user status");
+    }
+  };
+
   const filteredUsers = users.filter(user => 
     user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.unique_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -367,6 +392,12 @@ const AdminDashboard = () => {
                         <TableHead>Current Balance</TableHead>
                         <TableHead>Add Amount</TableHead>
                         <TableHead>Created At</TableHead>
+                        <TableHead className="text-center">
+                          <div className="flex items-center gap-1 justify-center">
+                            <Ban className="w-4 h-4" />
+                            Block
+                          </div>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -415,6 +446,13 @@ const AdminDashboard = () => {
                             </TableCell>
                             <TableCell>
                               {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                              <Switch
+                                checked={user.is_blocked || false}
+                                onCheckedChange={() => user.user_id && handleToggleBlock(user.user_id, user.is_blocked || false)}
+                                className="data-[state=checked]:bg-destructive"
+                              />
                             </TableCell>
                           </TableRow>
                         ))
