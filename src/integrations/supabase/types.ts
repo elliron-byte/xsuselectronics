@@ -223,6 +223,7 @@ export type Database = {
           email: string | null
           id: string
           invitation_code: string | null
+          is_blocked: boolean
           last_checkin_at: string | null
           phone: string | null
           unique_code: string | null
@@ -234,6 +235,7 @@ export type Database = {
           email?: string | null
           id?: string
           invitation_code?: string | null
+          is_blocked?: boolean
           last_checkin_at?: string | null
           phone?: string | null
           unique_code?: string | null
@@ -245,6 +247,7 @@ export type Database = {
           email?: string | null
           id?: string
           invitation_code?: string | null
+          is_blocked?: boolean
           last_checkin_at?: string | null
           phone?: string | null
           unique_code?: string | null
