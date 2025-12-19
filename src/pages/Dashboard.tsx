@@ -79,8 +79,8 @@ const Dashboard = () => {
     price: 50,
     priceDisplay: "50 Ghs",
     revenue: "10 Days",
-    dailyEarnings: "10 Ghs",
-    totalGain: "100 Ghs",
+    dailyEarnings: "11 Ghs",
+    totalGain: "110 Ghs",
     isSpecial: true,
   };
 
@@ -147,16 +147,14 @@ const Dashboard = () => {
       return;
     }
 
-    // Special device validation - cannot use registration bonus
+    // Special device validation - balance must be at least 70 GHS
     if (investment.isSpecial) {
       const currentBalance = userData?.balance || 0;
-      // User needs to have recharged at least 50 GHS (balance must be > registration bonus + price without using bonus)
-      const rechargedAmount = currentBalance - REGISTRATION_BONUS;
       
-      if (rechargedAmount < investment.price) {
+      if (currentBalance < 70) {
         toast({
           title: "Insufficient Balance",
-          description: "You cannot purchase this Special Device with your registration bonus. Please recharge at least 50 GHS to purchase this device.",
+          description: "Your account balance must be at least 70 GHS to purchase this Special Device.",
           variant: "destructive"
         });
         return;
@@ -361,14 +359,13 @@ const Dashboard = () => {
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-amber-800 font-medium mb-2">⚠️ Important Notice</p>
               <p className="text-sm text-amber-700">
-                You cannot purchase this Special Device with your registration bonus. 
-                You must recharge at least <span className="font-bold">50 GHS</span> to purchase this device.
+                Your account balance must be at least <span className="font-bold">70 GHS</span> to purchase this Special Device.
               </p>
             </div>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>Product Price: <span className="font-semibold text-foreground">50 GHS</span></p>
-              <p>Daily Earnings: <span className="font-semibold text-foreground">10 GHS</span></p>
-              <p>Total Gain: <span className="font-semibold text-foreground">100 GHS</span></p>
+              <p>Daily Earnings: <span className="font-semibold text-foreground">11 GHS</span></p>
+              <p>Total Gain: <span className="font-semibold text-foreground">110 GHS</span></p>
             </div>
             <Button 
               onClick={() => {
